@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-import "./helpers/Upgrader.sol";
+import "./Upgrader.sol";
 
 contract Registry is Ownable {
     Upgrader internal _upgrader;

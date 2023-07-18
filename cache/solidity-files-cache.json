@@ -1,41 +1,6 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "/Users/solene/Documents/code/haqq-core/contracts/Lock.sol": {
-      "lastModificationDate": 1689630336744,
-      "contentHash": "e4d5ef533cde0324942ef6a5e151416e",
-      "sourceName": "contracts/Lock.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.9"
-      ],
-      "artifacts": [
-        "Lock"
-      ]
-    },
     "/Users/solene/Documents/code/haqq-core/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
       "lastModificationDate": 1689625846169,
       "contentHash": "5a20b2cad87ddb61c7a3a6af21289e28",
@@ -703,45 +668,6 @@
         "ERC721Burnable"
       ]
     },
-    "/Users/solene/Documents/code/haqq-core/contracts/Registry.sol": {
-      "lastModificationDate": 1689626581066,
-      "contentHash": "bc0c94babf1f0a0d70a03c5f1f4eb6fa",
-      "sourceName": "contracts/Registry.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol",
-        "./helpers/Upgrader.sol"
-      ],
-      "versionPragmas": [
-        "0.8.19"
-      ],
-      "artifacts": [
-        "Registry"
-      ]
-    },
     "/Users/solene/Documents/code/haqq-core/contracts/helpers/Upgrader.sol": {
       "lastModificationDate": 1689626541030,
       "contentHash": "bc1451a3939df81ea75fdc5a694ff023",
@@ -1072,45 +998,6 @@
         "IBeacon"
       ]
     },
-    "/Users/solene/Documents/code/haqq-core/contracts/Contract.sol": {
-      "lastModificationDate": 1689630088180,
-      "contentHash": "c5a268642b50af56b0daab8368f01df2",
-      "sourceName": "contracts/Contract.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
-        "./Registry.sol",
-        "./interfaces/IContract.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.19"
-      ],
-      "artifacts": [
-        "Contract"
-      ]
-    },
     "/Users/solene/Documents/code/haqq-core/contracts/interfaces/IContract.sol": {
       "lastModificationDate": 1689627648477,
       "contentHash": "1d5de448f7dd6738b409612186d0687c",
@@ -1331,8 +1218,8 @@
       ]
     },
     "/Users/solene/Documents/code/haqq-core/contracts/tokens/ERC721H.sol": {
-      "lastModificationDate": 1689627717821,
-      "contentHash": "73e1c696dc145c6cbecd86769e3b79c4",
+      "lastModificationDate": 1689699422679,
+      "contentHash": "888348bb1a593717d91dcbba865da5b9",
       "sourceName": "contracts/tokens/ERC721H.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -1359,7 +1246,8 @@
       },
       "imports": [
         "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol"
+        "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol",
+        "../interfaces/tokens/IERC721H.sol"
       ],
       "versionPragmas": [
         "0.8.19"
@@ -1369,8 +1257,8 @@
       ]
     },
     "/Users/solene/Documents/code/haqq-core/contracts/tokens/ERC1155H.sol": {
-      "lastModificationDate": 1689627720962,
-      "contentHash": "09334e23bf9575d37c58c6f483e06b33",
+      "lastModificationDate": 1689699429955,
+      "contentHash": "b482b4dba7ac94164b771ab352f65f21",
       "sourceName": "contracts/tokens/ERC1155H.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -1397,7 +1285,8 @@
       },
       "imports": [
         "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol"
+        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol",
+        "../interfaces/tokens/IERC1155H.sol"
       ],
       "versionPragmas": [
         "0.8.19"
@@ -1439,6 +1328,415 @@
       ],
       "artifacts": [
         "console"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/NFTRegistry.sol": {
+      "lastModificationDate": 1689699979687,
+      "contentHash": "a5cc847f39d130b44ea448c37bd40071",
+      "sourceName": "contracts/NFTRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+        "./helpers/Registry.sol",
+        "./interfaces/IContract.sol",
+        "./interfaces/INFTRegistry.sol",
+        "./interfaces/tokens/IERC721H.sol",
+        "./interfaces/tokens/IERC1155H.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "NFTRegistry"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/interfaces/INFTRegistry.sol": {
+      "lastModificationDate": 1689696823903,
+      "contentHash": "e1b5626302bb0dd1fadfa87415791621",
+      "sourceName": "contracts/interfaces/INFTRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "INFTRegistry"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/Wallet.sol": {
+      "lastModificationDate": 1689699822749,
+      "contentHash": "8b461cb4539f9986fbfdd62348b812d5",
+      "sourceName": "contracts/Wallet.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+        "./helpers/Registry.sol",
+        "./interfaces/IWallet.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "Wallet"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/interfaces/IWallet.sol": {
+      "lastModificationDate": 1689696806810,
+      "contentHash": "4a30ccd244687e7562b861bd3302bd6a",
+      "sourceName": "contracts/interfaces/IWallet.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "IWallet"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/interfaces/tokens/IERC1155H.sol": {
+      "lastModificationDate": 1689698210444,
+      "contentHash": "6379a4acf11bca6d5251dcb8b52356cd",
+      "sourceName": "contracts/interfaces/tokens/IERC1155H.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "IERC1155H"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/interfaces/tokens/IERC721H.sol": {
+      "lastModificationDate": 1689697223635,
+      "contentHash": "7f5f41e7d8073ed56062bb8e12aa9df4",
+      "sourceName": "contracts/interfaces/tokens/IERC721H.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "IERC721H"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/Listing.sol": {
+      "lastModificationDate": 1689700018050,
+      "contentHash": "616a32a5dac80c9b6cbe950979ce0d20",
+      "sourceName": "contracts/Listing.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+        "./helpers/Registry.sol",
+        "./interfaces/IListing.sol",
+        "./interfaces/IAuction.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "Listing"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/helpers/Registry.sol": {
+      "lastModificationDate": 1689698486333,
+      "contentHash": "332f2f7b5a83cf8d4df1af368e518f96",
+      "sourceName": "contracts/helpers/Registry.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol",
+        "./Upgrader.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "Registry"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/interfaces/IListing.sol": {
+      "lastModificationDate": 1689698575532,
+      "contentHash": "d1bcbfc737e5019661f0325dd2ea7dcb",
+      "sourceName": "contracts/interfaces/IListing.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "IListing"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/Auction.sol": {
+      "lastModificationDate": 1689699771949,
+      "contentHash": "7f5213323d0223011394405ba2d2d66e",
+      "sourceName": "contracts/Auction.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+        "./helpers/Registry.sol",
+        "./interfaces/IAuction.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "Auction"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/interfaces/IAuction.sol": {
+      "lastModificationDate": 1689699695728,
+      "contentHash": "d28b7d7ec242c75d6459b4cc817fc848",
+      "sourceName": "contracts/interfaces/IAuction.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "IAuction"
       ]
     }
   }

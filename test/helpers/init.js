@@ -1,8 +1,16 @@
 const { ethers, upgrades } = require('hardhat');
 
+const args = process.env;
+
 let registry;
 
-let contract;
+let erc721H;
+let erc1155H;
+
+let wallet;
+let nftRegistry;
+let listing;
+let auction;
 
 const init = async () => {
   const users = await ethers.getSigners();
@@ -20,7 +28,13 @@ const init = async () => {
 
   return {
     users,
-    contract,
+    registry,
+    erc721H,
+    erc1155H,
+    wallet,
+    nftRegistry,
+    listing,
+    auction,
   };
 };
 
@@ -28,46 +42,89 @@ async function deployContracts() {
   // Registry
   registry = await ethers.deployContract('Registry');
   await registry.waitForDeployment();
-  console.log('Registry address:', await registry.getAddress());
-
-  // Contract
-  contract = await ethers.deployContract('Contract');
-  await contract.waitForDeployment();
-  console.log('Contract address:', await contract.getAddress());
-
-  //await wait(30_000);
+  // console.log('Registry address:', await registry.getAddress());
+  // ERC721H
+  erc721H = await ethers.deployContract('ERC721H', [args.ERC721H_NAME, args.ERC721H_SYMBOL]);
+  await erc721H.waitForDeployment();
+  // console.log('ERC721H address:', await erc721H.getAddress());
+  // ERC1155H
+  erc1155H = await ethers.deployContract('ERC1155H', [args.ERC1155H_BASE_TOKEN_URI]);
+  await erc1155H.waitForDeployment();
+  // console.log('ERC1155H address:', await erc1155H.getAddress());
 }
 
 async function deployImplementations() {
-  // Contract
-  // contract = await ethers.deployContract('Contract');
-  // await contract.waitForDeployment();
-  //await wait(30_000);
+  // Wallet
+  wallet = await ethers.deployContract('Wallet');
+  await wallet.waitForDeployment();
+  // console.log('Wallet address:', await wallet.getAddress());
+  // NFTRegistry
+  nftRegistry = await ethers.deployContract('NFTRegistry');
+  await nftRegistry.waitForDeployment();
+  // console.log('NFTRegistry address:', await nftRegistry.getAddress());
+  // Listing
+  listing = await ethers.deployContract('Listing');
+  await listing.waitForDeployment();
+  // console.log('Listing address:', await listing.getAddress());
+  // Auction
+  auction = await ethers.deployContract('Auction');
+  await auction.waitForDeployment();
+  // console.log('Auction address:', await auction.getAddress());
 }
 
 async function addContracts() {
-  // tx = await registry.addContract('TREASURY', '');
-  //await tx.wait();
+  // ERC721H
+  await registry.addContract(args.ERC721H_ID, await erc721H.getAddress());
+  // ERC1155H
+  await registry.addContract(args.ERC1155H_ID, await erc1155H.getAddress());
 }
 
 async function addProxies() {
-  //tx = await registry.addProxyContract('CONTRACT', contract);
-  //await tx.wait();
+  // Wallet
+  await registry.addProxyContract(args.WALLET_ID, await wallet.getAddress());
+  // NFTRegistry
+  await registry.addProxyContract(args.NFT_REGISTRY_ID, await nftRegistry.getAddress());
+  // Listing
+  await registry.addProxyContract(args.LISTING_ID, await listing.getAddress());
+  // Auction
+  await registry.addProxyContract(args.AUCTION_ID, await auction.getAddress());
 }
 
 async function deployProxies() {
-  // Contract
-  // contract = await Contract.attach(await registry.getContract('CONTRACT'));
-  //await wait(30_000);
+  // Wallet
+  const Wallet = await hre.ethers.getContractFactory('Wallet');
+  wallet = Wallet.attach(await registry.getContract(args.WALLET_ID));
+  // NFTRegistry
+  const NFTRegistry = await hre.ethers.getContractFactory('NFTRegistry');
+  nftRegistry = NFTRegistry.attach(await registry.getContract(args.NFT_REGISTRY_ID));
+  // Listing
+  const Listing = await hre.ethers.getContractFactory('Listing');
+  listing = Listing.attach(await registry.getContract(args.LISTING_ID));
+  // Auction
+  const Auction = await hre.ethers.getContractFactory('Auction');
+  auction = Auction.attach(await registry.getContract(args.AUCTION_ID));
 }
 
 async function initContracts() {
-  // await contract.__Contract_init();
+  // Wallet
+  await wallet.__Wallet_init();
+  // NFTRegistry
+  await nftRegistry.__NFTRegistry_init();
+  // Listing
+  await listing.__Listing_init();
+  // Auction
+  await auction.__Auction_init();
 }
 
 async function setDependencies() {
-  // tx = await contract.setDependencies(registry.getAddress());
-  // await tx.wait();
+  // Wallet
+  await wallet.setDependencies(await registry.getAddress());
+  // NFTRegistry
+  await nftRegistry.setDependencies(await registry.getAddress());
+  // Listing
+  await listing.setDependencies(await registry.getAddress());
+  // Auction
+  await auction.setDependencies(await registry.getAddress());
 }
 
 module.exports.init = init;

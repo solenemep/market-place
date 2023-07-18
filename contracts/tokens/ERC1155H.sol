@@ -5,6 +5,8 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
 
-contract ERC1155H is ERC1155Burnable {
+import "../interfaces/tokens/IERC1155H.sol";
+
+contract ERC1155H is IERC1155H, ERC1155Burnable, Ownable {
     constructor(string memory uri) ERC1155(uri) {}
 }
