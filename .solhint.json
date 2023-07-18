@@ -1,0 +1,19 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "reentrancy": "off",
+    "prettier/prettier": "off",
+    "modifier-name-mixedcase": "off",
+    "no-empty-blocks": "off",
+    "func-visibility": "off",
+    "max-states-count": "off",
+    "not-rely-on-time": "off",
+    "compiler-version": "off",
+    "func-order": "off",
+    "mark-callable-contracts": "off",
+    "private-vars-leading-underscore": "off",
+    "reason-string": "off",
+    "no-global-import": "off"
+  },
+  "plugins": ["prettier"]
+}
