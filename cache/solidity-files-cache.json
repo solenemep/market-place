@@ -1331,8 +1331,8 @@
       ]
     },
     "/Users/solene/Documents/code/haqq-core/contracts/NFTRegistry.sol": {
-      "lastModificationDate": 1689699979687,
-      "contentHash": "a5cc847f39d130b44ea448c37bd40071",
+      "lastModificationDate": 1689729896100,
+      "contentHash": "85315f123eb3bb2895ffceaf98b408c4",
       "sourceName": "contracts/NFTRegistry.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -1359,11 +1359,15 @@
       },
       "imports": [
         "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+        "@openzeppelin/contracts/utils/structs/EnumerableSet.sol",
+        "@openzeppelin/contracts/utils/math/Math.sol",
+        "./libraries/SafeMath.sol",
         "./helpers/Registry.sol",
         "./interfaces/IContract.sol",
         "./interfaces/INFTRegistry.sol",
         "./interfaces/tokens/IERC721H.sol",
-        "./interfaces/tokens/IERC1155H.sol"
+        "./interfaces/tokens/IERC1155H.sol",
+        "./interfaces/INFTIdentifier.sol"
       ],
       "versionPragmas": [
         "^0.8.19"
@@ -1373,8 +1377,8 @@
       ]
     },
     "/Users/solene/Documents/code/haqq-core/contracts/interfaces/INFTRegistry.sol": {
-      "lastModificationDate": 1689696823903,
-      "contentHash": "e1b5626302bb0dd1fadfa87415791621",
+      "lastModificationDate": 1689725956163,
+      "contentHash": "35fd9a58eb65622a8089b879a51a23dc",
       "sourceName": "contracts/interfaces/INFTRegistry.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -1737,6 +1741,189 @@
       ],
       "artifacts": [
         "IAuction"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/libraries/SafeMath.sol": {
+      "lastModificationDate": 1689726273268,
+      "contentHash": "c7e8a273d2ccf750b03166972493a627",
+      "sourceName": "contracts/libraries/SafeMath.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "SafeMath"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/node_modules/@openzeppelin/contracts/utils/structs/EnumerableSet.sol": {
+      "lastModificationDate": 1689699027494,
+      "contentHash": "e029f029abc1fd2d85d54fd69086f076",
+      "sourceName": "@openzeppelin/contracts/utils/structs/EnumerableSet.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "EnumerableSet"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/NFTIdentifier.sol": {
+      "lastModificationDate": 1689729773721,
+      "contentHash": "b6ba8beb5228ab68057bcfae21eb4a64",
+      "sourceName": "contracts/NFTIdentifier.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "@openzeppelin/contracts/token/ERC1155/IERC1155.sol",
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol",
+        "./interfaces/INFTIdentifier.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "NFTIdentifier"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/node_modules/@openzeppelin/contracts/utils/introspection/ERC165Checker.sol": {
+      "lastModificationDate": 1689699027486,
+      "contentHash": "0a66857c4a2223ad54b814ea56470c97",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC165Checker"
+      ]
+    },
+    "/Users/solene/Documents/code/haqq-core/contracts/interfaces/INFTIdentifier.sol": {
+      "lastModificationDate": 1689729742083,
+      "contentHash": "08bfee9eed66eab3cb54bcebf6cfbc4b",
+      "sourceName": "contracts/interfaces/INFTIdentifier.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "INFTIdentifier"
       ]
     }
   }

@@ -6,6 +6,7 @@ let registry;
 
 let erc721H;
 let erc1155H;
+let nftIdentifier;
 
 let wallet;
 let nftRegistry;
@@ -31,6 +32,7 @@ const init = async () => {
     registry,
     erc721H,
     erc1155H,
+    nftIdentifier,
     wallet,
     nftRegistry,
     listing,
@@ -51,6 +53,10 @@ async function deployContracts() {
   erc1155H = await ethers.deployContract('ERC1155H', [args.ERC1155H_BASE_TOKEN_URI]);
   await erc1155H.waitForDeployment();
   // console.log('ERC1155H address:', await erc1155H.getAddress());
+  // NFTIdentifier
+  nftIdentifier = await ethers.deployContract('NFTIdentifier');
+  await nftIdentifier.waitForDeployment();
+  // console.log('NFTIdentifier address:', await nftIdentifier.getAddress());
 }
 
 async function deployImplementations() {
@@ -77,6 +83,8 @@ async function addContracts() {
   await registry.addContract(args.ERC721H_ID, await erc721H.getAddress());
   // ERC1155H
   await registry.addContract(args.ERC1155H_ID, await erc1155H.getAddress());
+  // NFTIdentifier
+  await registry.addContract(args.NFT_IDENTIFIER_ID, await nftIdentifier.getAddress());
 }
 
 async function addProxies() {
