@@ -1218,8 +1218,8 @@
       ]
     },
     "/Users/solene/Documents/code/haqq-core/contracts/tokens/ERC721H.sol": {
-      "lastModificationDate": 1689699422679,
-      "contentHash": "888348bb1a593717d91dcbba865da5b9",
+      "lastModificationDate": 1689771822034,
+      "contentHash": "fcff9b8e5eef5a94a13f25a42bf90b1d",
       "sourceName": "contracts/tokens/ERC721H.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -1331,8 +1331,8 @@
       ]
     },
     "/Users/solene/Documents/code/haqq-core/contracts/NFTRegistry.sol": {
-      "lastModificationDate": 1689729896100,
-      "contentHash": "85315f123eb3bb2895ffceaf98b408c4",
+      "lastModificationDate": 1689771701086,
+      "contentHash": "a2d6b2ef2b74da0b8faa7a4ee4be7f1a",
       "sourceName": "contracts/NFTRegistry.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -1377,8 +1377,8 @@
       ]
     },
     "/Users/solene/Documents/code/haqq-core/contracts/interfaces/INFTRegistry.sol": {
-      "lastModificationDate": 1689725956163,
-      "contentHash": "35fd9a58eb65622a8089b879a51a23dc",
+      "lastModificationDate": 1689771617259,
+      "contentHash": "dd3223d0044a0794f790a2a888d6be43",
       "sourceName": "contracts/interfaces/INFTRegistry.sol",
       "solcConfig": {
         "version": "0.8.19",
