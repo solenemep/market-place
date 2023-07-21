@@ -2,16 +2,21 @@
 pragma solidity 0.8.19;
 
 interface INFTRegistry {
-    function isWhitelisted(address contractAddress) external view returns (bool);
+    function isWhitelisted(address nftAddress, uint256 nftID) external view returns (bool);
 
-    function countAllWhitelisted() external view returns (uint256);
+    function countNFTAddresses() external view returns (uint256);
 
-    function getAllWhitelisted(
-        uint256 offset,
-        uint256 limit
-    ) external view returns (address[] memory whitelistedContracts);
+    function countNFTIDs(address nftAddress) external view returns (uint256);
 
-    function addWhitelist(address contractAddress) external;
+    function getNFTAddresses(uint256 offset, uint256 limit) external view returns (address[] memory nftAddresses);
 
-    function removeWhitelist(address contractAddress) external;
+    function getNFTIDs(address nftAddress, uint256 offset, uint256 limit) external view returns (uint[] memory nftIDs);
+
+    function addWhitelist(address nftAddress, uint256 nftID) external;
+
+    function addWhitelistBatch(address[] memory nftAddresses, uint256[] memory nftIDs) external;
+
+    function removeWhitelist(address nftAddress, uint256 nftID) external;
+
+    function removeWhitelistBatch(address[] memory nftAddresses, uint256[] memory nftIDs) external;
 }
