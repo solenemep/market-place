@@ -5,14 +5,21 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
+import "../helpers/Registry.sol";
 import "../interfaces/tokens/IERC721H.sol";
 
+import "../interfaces/INFTRegistry.sol";
+
 contract ERC721H is IERC721H, ERC721Burnable, Ownable {
+    INFTRegistry public nftRegistry;
+
     constructor(string memory name, string memory symbol) ERC721(name, symbol) {}
 
-    function setDependencies(address registryAddress) external onlyOwner {}
+    function setDependencies(address registryAddress) external onlyOwner {
+        nftRegistry = INFTRegistry(Registry(registryAddress).getContract("NFT_REGISTRY"));
+    }
 
-     /**
+    /**
      * @dev Indicates a failure with the `operator`’s approval. Used in transfers.
      * @param operator Address that may be allowed to operate on tokens without being their owner.
      * @param tokenId Identifier number of a token.
@@ -31,5 +38,7 @@ contract ERC721H is IERC721H, ERC721Burnable, Ownable {
             revert ERC721InsufficientApproval(_msgSender(), tokenId);
         }
         _burn(tokenId);
+
+        nftRegistry.removeWhitelist(address(this), tokenId);
     }
 }

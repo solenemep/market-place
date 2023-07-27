@@ -36,6 +36,14 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     EnumerableSet.AddressSet internal _nftAddresses; // smart contracts that carry whitelisted NFT
     mapping(address => EnumerableSet.UintSet) internal _nftIDs; // smart contract -> whitelisted NFT ID
 
+    modifier onlyAutorized() {
+        require(
+            msg.sender == address(erc721H) || msg.sender == address(erc1155H) || hasRole(WHITELISTER_ROLE, msg.sender),
+            "NFTRegistry : wrong caller"
+        );
+        _;
+    }
+
     function __NFTRegistry_init() external initializer {
         __Ownable_init();
         __AccessControl_init();
@@ -102,14 +110,11 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
         }
     }
 
-    function addWhitelist(address nftAddress, uint256 nftID) external override onlyRole(WHITELISTER_ROLE) {
+    function addWhitelist(address nftAddress, uint256 nftID) external override onlyAutorized {
         _addWhitelist(nftAddress, nftID);
     }
 
-    function addWhitelistBatch(
-        address[] memory nftAddresses,
-        uint256[] memory nftIDs
-    ) external override onlyRole(WHITELISTER_ROLE) {
+    function addWhitelistBatch(address[] memory nftAddresses, uint256[] memory nftIDs) external override onlyAutorized {
         require(nftAddresses.length == nftIDs.length, "NFTRegistry : length mismatch");
         require(nftAddresses.length < MAX_WHITELIST, "NFTRegistry : too many NFTs");
 
@@ -125,14 +130,14 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
         }
     }
 
-    function removeWhitelist(address nftAddress, uint256 nftID) external override onlyRole(WHITELISTER_ROLE) {
+    function removeWhitelist(address nftAddress, uint256 nftID) external override onlyAutorized {
         _removeWhitelist(nftAddress, nftID);
     }
 
     function removeWhitelistBatch(
         address[] memory nftAddresses,
         uint256[] memory nftIDs
-    ) external override onlyRole(WHITELISTER_ROLE) {
+    ) external override onlyAutorized {
         require(nftAddresses.length == nftIDs.length, "NFTRegistry : length mismatch");
         require(nftAddresses.length < MAX_WHITELIST, "NFTRegistry : too many NFTs");
 
@@ -154,7 +159,7 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
 
     /// @notice token has been minted and gas fee calculated
     // TODO check if they want same tx for whitelisting and update balance, if yes, moderator = whitelister
-    function approveMinting(
+    function approveRequest(
         address nftAddress,
         uint256 nftID,
         uint256 mintingID,
@@ -164,11 +169,11 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
         wallet.updateBalance(mintingID, gasFee, true);
     }
 
-    function declineMinting(uint256 mintingID) external onlyRole(MODERATOR_ROLE) {
+    function declineRequest(uint256 mintingID) external onlyRole(MODERATOR_ROLE) {
         wallet.updateBalance(mintingID, 0, false);
     }
 
-    function revokeMinting(address nftAddress, uint256 nftID) external onlyRole(MODERATOR_ROLE) {
+    function revokeRequest(address nftAddress, uint256 nftID) external onlyRole(MODERATOR_ROLE) {
         _removeWhitelist(nftAddress, nftID);
     }
 }

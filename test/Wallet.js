@@ -110,7 +110,7 @@ describe('Wallet', async () => {
   describe('withdraw', async () => {
     it('withdraw successfully', async () => {
       await wallet.connect(user1).deposit(1, { value: moderationAmount });
-      await nftRegistry.connect(moderator).approveMinting(erc1155HAddress, 1, 1, gasFee);
+      await nftRegistry.connect(moderator).approveRequest(erc1155HAddress, 1, 1, gasFee);
 
       expect((await wallet.balances(1)).wallet).to.equal(user1.address);
       expect((await wallet.balances(1)).locked).to.equal(0);
@@ -133,7 +133,7 @@ describe('Wallet', async () => {
       const reason = 'Wallet : not autorised';
 
       await wallet.connect(user1).deposit(1, { value: moderationAmount });
-      await nftRegistry.connect(moderator).approveMinting(erc1155HAddress, 1, 1, gasFee);
+      await nftRegistry.connect(moderator).approveRequest(erc1155HAddress, 1, 1, gasFee);
 
       await expect(wallet.connect(user2).withdraw(1)).to.be.revertedWith(reason);
     });
@@ -146,7 +146,7 @@ describe('Wallet', async () => {
       const reason = 'Wallet : nothing to withdraw';
 
       await wallet.connect(user1).deposit(1, { value: moderationAmount });
-      await nftRegistry.connect(moderator).approveMinting(erc1155HAddress, 1, 1, gasFee);
+      await nftRegistry.connect(moderator).approveRequest(erc1155HAddress, 1, 1, gasFee);
       await wallet.connect(user1).withdraw(1);
 
       await expect(wallet.connect(user1).withdraw(1)).to.be.revertedWith(reason);
@@ -155,7 +155,7 @@ describe('Wallet', async () => {
       const reason = 'Wallet : nothing to withdraw';
 
       await wallet.connect(user1).deposit(1, { value: moderationAmount });
-      const tx = await nftRegistry.connect(moderator).declineMinting(1);
+      const tx = await nftRegistry.connect(moderator).declineRequest(1);
 
       await expect(tx).to.changeEtherBalances([walletAddress, daoAddress], [-moderationAmount, +moderationAmount]);
 
@@ -170,7 +170,7 @@ describe('Wallet', async () => {
   describe('withdrawMarketPlaceBalance', async () => {
     it('withdraw successfully', async () => {
       await wallet.connect(user1).deposit(1, { value: moderationAmount });
-      await nftRegistry.connect(moderator).approveMinting(erc1155HAddress, 1, 1, gasFee);
+      await nftRegistry.connect(moderator).approveRequest(erc1155HAddress, 1, 1, gasFee);
 
       expect(await wallet.marketPlaceBalance()).to.equal(gasFee);
 

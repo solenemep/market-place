@@ -24,8 +24,8 @@ contract Wallet is IWallet, OwnableUpgradeable {
     event Deposited(uint256 mintingID, address indexed sender, uint256 amount);
     event Withdrawn(uint256 mintingID, address indexed recipient, uint256 amount);
 
-    modifier onlyNFTRegistry() {
-        require(address(nftRegistry) == msg.sender, "Wallet : wrong caller");
+    modifier onlyAutorized() {
+        require(msg.sender == address(nftRegistry), "Wallet : wrong caller");
         _;
     }
 
@@ -69,7 +69,7 @@ contract Wallet is IWallet, OwnableUpgradeable {
         emit Withdrawn(mintingID, msg.sender, amount);
     }
 
-    function updateBalance(uint256 mintingID, uint256 gasFee, bool unlock) external onlyNFTRegistry {
+    function updateBalance(uint256 mintingID, uint256 gasFee, bool unlock) external onlyAutorized {
         uint256 amount = balances[mintingID].locked;
         balances[mintingID].locked = 0;
         if (amount > 0) {

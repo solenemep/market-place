@@ -5,12 +5,19 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
 
+import "../helpers/Registry.sol";
 import "../interfaces/tokens/IERC1155H.sol";
 
+import "../interfaces/INFTRegistry.sol";
+
 contract ERC1155H is IERC1155H, ERC1155Burnable, Ownable {
+    INFTRegistry public nftRegistry;
+
     constructor(string memory uri) ERC1155(uri) {}
 
-    function setDependencies(address registryAddress) external onlyOwner {}
+    function setDependencies(address registryAddress) external onlyOwner {
+        nftRegistry = INFTRegistry(Registry(registryAddress).getContract("NFT_REGISTRY"));
+    }
 
     /**
      * @dev Indicates a failure with the `operator`’s approval. Used in transfers.
@@ -25,6 +32,8 @@ contract ERC1155H is IERC1155H, ERC1155Burnable, Ownable {
         }
 
         _burn(account, id, value);
+
+        nftRegistry.removeWhitelist(address(this), id);
     }
 
     function burnBatch(address account, uint256[] memory ids, uint256[] memory values) public virtual override {
@@ -33,5 +42,11 @@ contract ERC1155H is IERC1155H, ERC1155Burnable, Ownable {
         }
 
         _burnBatch(account, ids, values);
+
+        address[] memory nftAddresses = new address[](ids.length);
+        for (uint256 i = 0; i < ids.length; i++) {
+            nftAddresses[i] = address(this);
+        }
+        nftRegistry.removeWhitelistBatch(nftAddresses, ids);
     }
 }

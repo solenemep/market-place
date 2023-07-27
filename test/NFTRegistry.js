@@ -141,6 +141,9 @@ describe('NFTRegistry', async () => {
         await nftRegistry.connect(whitelister).removeWhitelist(erc1155HAddress, 1);
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(false);
       });
+      it('removeWhitelist when burn', async () => {
+        // TODO
+      });
       it('removeWhitelistBatch successfully', async () => {
         await nftRegistry
           .connect(whitelister)
@@ -159,6 +162,9 @@ describe('NFTRegistry', async () => {
         expect(await nftRegistry.isWhitelisted(erc721HAddress, 2)).to.equal(false);
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(false);
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 2)).to.equal(false);
+      });
+      it('removeWhitelist when burnBatch', async () => {
+        // TODO
       });
       it('reverts removeWhitelistBatch - length mismatch', async () => {
         const reason = 'NFTRegistry : length mismatch';
@@ -188,8 +194,8 @@ describe('NFTRegistry', async () => {
     });
   });
   describe('moderation', async () => {
-    describe('approveMinting', async () => {
-      it('approveMinting successfully', async () => {
+    describe('approveRequest', async () => {
+      it('approveRequest successfully', async () => {
         await wallet.connect(user1).deposit(1, { value: moderationAmount });
 
         // balances
@@ -201,7 +207,7 @@ describe('NFTRegistry', async () => {
         // whitelist
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(false);
 
-        const tx = await nftRegistry.connect(moderator).approveMinting(erc1155HAddress, 1, 1, gasFee);
+        const tx = await nftRegistry.connect(moderator).approveRequest(erc1155HAddress, 1, 1, gasFee);
 
         await expect(tx).to.changeEtherBalance(user1.address, 0);
         await expect(tx).to.changeEtherBalance(moderator.address, 0);
@@ -220,9 +226,9 @@ describe('NFTRegistry', async () => {
         // whitelist
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(true);
       });
-      it('do nothing if approveMinting twice', async () => {
+      it('do nothing if approveRequest twice', async () => {
         await wallet.connect(user1).deposit(1, { value: moderationAmount });
-        await nftRegistry.connect(moderator).approveMinting(erc1155HAddress, 1, 1, gasFee);
+        await nftRegistry.connect(moderator).approveRequest(erc1155HAddress, 1, 1, gasFee);
 
         // balances
         expect((await wallet.balances(1)).wallet).to.equal(user1.address);
@@ -235,7 +241,7 @@ describe('NFTRegistry', async () => {
         // whitelist
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(true);
 
-        const tx = await nftRegistry.connect(moderator).approveMinting(erc1155HAddress, 1, 1, gasFee);
+        const tx = await nftRegistry.connect(moderator).approveRequest(erc1155HAddress, 1, 1, gasFee);
 
         await expect(tx).to.changeEtherBalance(user1.address, 0);
         await expect(tx).to.changeEtherBalance(moderator.address, 0);
@@ -255,8 +261,8 @@ describe('NFTRegistry', async () => {
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(true);
       });
     });
-    describe('declineMinting', async () => {
-      it('declineMinting successfully', async () => {
+    describe('declineRequest', async () => {
+      it('declineRequest successfully', async () => {
         await wallet.connect(user1).deposit(1, { value: moderationAmount });
 
         // balances
@@ -268,7 +274,7 @@ describe('NFTRegistry', async () => {
         // whitelist
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(false);
 
-        const tx = await nftRegistry.connect(moderator).declineMinting(1);
+        const tx = await nftRegistry.connect(moderator).declineRequest(1);
 
         await expect(tx).to.changeEtherBalance(user1.address, 0);
         await expect(tx).to.changeEtherBalance(moderator.address, 0);
@@ -285,9 +291,9 @@ describe('NFTRegistry', async () => {
         // whitelist
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(false);
       });
-      it('do nothing if declineMinting twice', async () => {
+      it('do nothing if declineRequest twice', async () => {
         await wallet.connect(user1).deposit(1, { value: moderationAmount });
-        await nftRegistry.connect(moderator).declineMinting(1);
+        await nftRegistry.connect(moderator).declineRequest(1);
 
         // balances
         expect((await wallet.balances(1)).wallet).to.equal(user1.address);
@@ -298,7 +304,7 @@ describe('NFTRegistry', async () => {
         // whitelist
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(false);
 
-        const tx = await nftRegistry.connect(moderator).declineMinting(1);
+        const tx = await nftRegistry.connect(moderator).declineRequest(1);
 
         await expect(tx).to.changeEtherBalance(user1.address, 0);
         await expect(tx).to.changeEtherBalance(moderator.address, 0);
@@ -316,10 +322,10 @@ describe('NFTRegistry', async () => {
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(false);
       });
     });
-    describe('revokeMinting', async () => {
-      it('revokeMinting successfully', async () => {
+    describe('revokeRequest', async () => {
+      it('revokeRequest successfully', async () => {
         await wallet.connect(user1).deposit(1, { value: moderationAmount });
-        await nftRegistry.connect(moderator).approveMinting(erc1155HAddress, 1, 1, gasFee);
+        await nftRegistry.connect(moderator).approveRequest(erc1155HAddress, 1, 1, gasFee);
 
         // balances
         expect((await wallet.balances(1)).wallet).to.equal(user1.address);
@@ -332,7 +338,7 @@ describe('NFTRegistry', async () => {
         // whitelist
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(true);
 
-        const tx = await nftRegistry.connect(moderator).revokeMinting(erc1155HAddress, 1);
+        const tx = await nftRegistry.connect(moderator).revokeRequest(erc1155HAddress, 1);
 
         await expect(tx).to.changeEtherBalance(user1.address, 0);
         await expect(tx).to.changeEtherBalance(moderator.address, 0);
@@ -351,10 +357,10 @@ describe('NFTRegistry', async () => {
         // whitelist
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(false);
       });
-      it('do nothing if revokeMinting twice', async () => {
+      it('do nothing if revokeRequest twice', async () => {
         await wallet.connect(user1).deposit(1, { value: moderationAmount });
-        await nftRegistry.connect(moderator).approveMinting(erc1155HAddress, 1, 1, gasFee);
-        await nftRegistry.connect(moderator).revokeMinting(erc1155HAddress, 1);
+        await nftRegistry.connect(moderator).approveRequest(erc1155HAddress, 1, 1, gasFee);
+        await nftRegistry.connect(moderator).revokeRequest(erc1155HAddress, 1);
 
         // balances
         expect((await wallet.balances(1)).wallet).to.equal(user1.address);
@@ -367,7 +373,7 @@ describe('NFTRegistry', async () => {
         // whitelist
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(false);
 
-        const tx = await nftRegistry.connect(moderator).revokeMinting(erc1155HAddress, 1);
+        const tx = await nftRegistry.connect(moderator).revokeRequest(erc1155HAddress, 1);
 
         await expect(tx).to.changeEtherBalance(user1.address, 0);
         await expect(tx).to.changeEtherBalance(moderator.address, 0);
