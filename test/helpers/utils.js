@@ -1,5 +1,7 @@
 const BigNumber = require('bignumber.js');
 const { takeSnapshot } = require('@nomicfoundation/hardhat-network-helpers');
+const { toWei } = web3.utils;
+const { ZERO_ADDRESS } = require('@openzeppelin/test-helpers/src/constants.js');
 
 let _snapshot;
 
@@ -32,6 +34,8 @@ async function getCosts(tx) {
 }
 
 module.exports = {
+  toWei,
+  ZERO_ADDRESS,
   snapshot,
   restore,
   toBN,

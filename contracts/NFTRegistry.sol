@@ -9,16 +9,14 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./libraries/SafeMath.sol";
 
 import "./helpers/Registry.sol";
-import "./interfaces/IContract.sol";
 import "./interfaces/INFTRegistry.sol";
 
 import "./interfaces/tokens/IERC721H.sol";
 import "./interfaces/tokens/IERC1155H.sol";
-import "./interfaces/INFTIdentifier.sol";
+import "./interfaces/IWallet.sol";
 
 /// @title NFTRegistry
 /// @notice This contract carries all minting request and whitelist logic
-/// @dev TODO Check if needed to fusion with Wallet.sol
 
 contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -27,12 +25,13 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     using Math for uint256;
 
     bytes32 public constant WHITELISTER_ROLE = keccak256("WHITELISTER_ROLE");
+    bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
     uint256 public constant MAX_WHITELIST = 100;
 
     IERC721H public erc721H;
     IERC1155H public erc1155H;
-    INFTIdentifier public nftIdentifier;
+    IWallet public wallet;
 
     EnumerableSet.AddressSet internal _nftAddresses; // smart contracts that carry whitelisted NFT
     mapping(address => EnumerableSet.UintSet) internal _nftIDs; // smart contract -> whitelisted NFT ID
@@ -47,8 +46,12 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     function setDependencies(address registryAddress) external onlyOwner {
         erc721H = IERC721H(Registry(registryAddress).getContract("ERC721H"));
         erc1155H = IERC1155H(Registry(registryAddress).getContract("ERC1155H"));
-        nftIdentifier = INFTIdentifier(Registry(registryAddress).getContract("NFT_IDENTIFIER"));
+        wallet = IWallet(Registry(registryAddress).getContract(("WALLET")));
     }
+
+    // ======================
+    // ||   WHITELISTING   ||
+    // ======================
 
     function isWhitelisted(address nftAddress, uint256 nftID) public view override returns (bool) {
         if (!_nftAddresses.contains(nftAddress)) {
@@ -143,5 +146,29 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
             _nftAddresses.remove(nftAddress);
             _nftIDs[nftAddress].remove(nftID);
         }
+    }
+
+    // ====================
+    // ||   MODERATION   ||
+    // ====================
+
+    /// @notice token has been minted and gas fee calculated
+    // TODO check if they want same tx for whitelisting and update balance, if yes, moderator = whitelister
+    function approveMinting(
+        address nftAddress,
+        uint256 nftID,
+        uint256 mintingID,
+        uint256 gasFee
+    ) external onlyRole(MODERATOR_ROLE) {
+        _addWhitelist(nftAddress, nftID);
+        wallet.updateBalance(mintingID, gasFee, true);
+    }
+
+    function declineMinting(uint256 mintingID) external onlyRole(MODERATOR_ROLE) {
+        wallet.updateBalance(mintingID, 0, false);
+    }
+
+    function revokeMinting(address nftAddress, uint256 nftID) external onlyRole(MODERATOR_ROLE) {
+        _removeWhitelist(nftAddress, nftID);
     }
 }
