@@ -25,7 +25,6 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     using Math for uint256;
 
     bytes32 public constant WHITELISTER_ROLE = keccak256("WHITELISTER_ROLE");
-    bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
     uint256 public constant MAX_WHITELIST = 100;
 
@@ -89,7 +88,7 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
 
         for (uint256 i = offset; i < to; i++) {
             uint256 index = i.uncheckedSub(offset);
-            nftAddresses[index] = _nftAddresses.at(index);
+            nftAddresses[index] = _nftAddresses.at(i);
         }
     }
 
@@ -158,22 +157,16 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     // ====================
 
     /// @notice token has been minted and gas fee calculated
-    // TODO check if they want same tx for whitelisting and update balance, if yes, moderator = whitelister
-    function approveRequest(
-        address nftAddress,
-        uint256 nftID,
-        uint256 mintingID,
-        uint256 gasFee
-    ) external onlyRole(MODERATOR_ROLE) {
+    function approveRequest(address nftAddress, uint256 nftID, uint256 mintingID, uint256 gasFee) external onlyOwner {
         _addWhitelist(nftAddress, nftID);
         wallet.updateBalance(mintingID, gasFee, true);
     }
 
-    function declineRequest(uint256 mintingID) external onlyRole(MODERATOR_ROLE) {
+    function declineRequest(uint256 mintingID) external onlyOwner {
         wallet.updateBalance(mintingID, 0, false);
     }
 
-    function revokeRequest(address nftAddress, uint256 nftID) external onlyRole(MODERATOR_ROLE) {
+    function revokeRequest(address nftAddress, uint256 nftID) external onlyOwner {
         _removeWhitelist(nftAddress, nftID);
     }
 }

@@ -19,7 +19,7 @@ contract Wallet is IWallet, OwnableUpgradeable {
     address public daoAddress;
 
     mapping(uint256 => Balance) public balances; // minting request id -> locked / unlocked funds
-    uint256 public marketPlaceBalance;
+    uint256 public plateformBalance;
 
     event Deposited(uint256 mintingID, address indexed sender, uint256 amount);
     event Withdrawn(uint256 mintingID, address indexed recipient, uint256 amount);
@@ -75,16 +75,16 @@ contract Wallet is IWallet, OwnableUpgradeable {
         if (amount > 0) {
             if (unlock) {
                 balances[mintingID].available = amount - gasFee;
-                marketPlaceBalance += gasFee;
+                plateformBalance += gasFee;
             } else {
                 payable(daoAddress).sendValue(amount);
             }
         }
     }
 
-    function withdrawMarketPlaceBalance() external onlyOwner {
-        uint256 amount = marketPlaceBalance;
-        marketPlaceBalance = 0;
+    function withdrawPlateformBalance() external onlyOwner {
+        uint256 amount = plateformBalance;
+        plateformBalance = 0;
         payable(msg.sender).sendValue(amount);
     }
 }

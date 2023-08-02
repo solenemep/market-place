@@ -15,9 +15,6 @@ describe('Wallet', async () => {
 
   let owner;
   let user1, user2, user3;
-  let moderator;
-
-  const MODERATOR_ROLE = web3.utils.soliditySha3('MODERATOR_ROLE');
 
   const moderationAmount = toWei('100000', 'mwei');
   const gasFee = toWei('100', 'mwei');
@@ -29,7 +26,6 @@ describe('Wallet', async () => {
     user1 = setups.users[1];
     user2 = setups.users[2];
     user3 = setups.users[3];
-    moderator = setups.users[5];
 
     registry = setups.registry;
     registryAddress = await registry.getAddress();
@@ -47,8 +43,6 @@ describe('Wallet', async () => {
     walletAddress = await wallet.getAddress();
 
     daoAddress = setups.daoAddress;
-
-    await nftRegistry.grantRole(MODERATOR_ROLE, moderator.address);
 
     await snapshot();
   });
@@ -110,12 +104,12 @@ describe('Wallet', async () => {
   describe('withdraw', async () => {
     it('withdraw successfully', async () => {
       await wallet.connect(user1).deposit(1, { value: moderationAmount });
-      await nftRegistry.connect(moderator).approveRequest(erc1155HAddress, 1, 1, gasFee);
+      await nftRegistry.connect(owner).approveRequest(erc1155HAddress, 1, 1, gasFee);
 
       expect((await wallet.balances(1)).wallet).to.equal(user1.address);
       expect((await wallet.balances(1)).locked).to.equal(0);
       expect((await wallet.balances(1)).available.toString()).to.equal(toBN(moderationAmount).minus(gasFee).toString());
-      expect(await wallet.marketPlaceBalance()).to.equal(gasFee);
+      expect(await wallet.plateformBalance()).to.equal(gasFee);
 
       const tx = await wallet.connect(user1).withdraw(1);
 
@@ -127,13 +121,13 @@ describe('Wallet', async () => {
       expect((await wallet.balances(1)).wallet).to.equal(user1.address);
       expect((await wallet.balances(1)).locked).to.equal(0);
       expect((await wallet.balances(1)).available).to.equal(0);
-      expect(await wallet.marketPlaceBalance()).to.equal(gasFee);
+      expect(await wallet.plateformBalance()).to.equal(gasFee);
     });
     it('reverts if not autorised', async () => {
       const reason = 'Wallet : not autorised';
 
       await wallet.connect(user1).deposit(1, { value: moderationAmount });
-      await nftRegistry.connect(moderator).approveRequest(erc1155HAddress, 1, 1, gasFee);
+      await nftRegistry.connect(owner).approveRequest(erc1155HAddress, 1, 1, gasFee);
 
       await expect(wallet.connect(user2).withdraw(1)).to.be.revertedWith(reason);
     });
@@ -146,7 +140,7 @@ describe('Wallet', async () => {
       const reason = 'Wallet : nothing to withdraw';
 
       await wallet.connect(user1).deposit(1, { value: moderationAmount });
-      await nftRegistry.connect(moderator).approveRequest(erc1155HAddress, 1, 1, gasFee);
+      await nftRegistry.connect(owner).approveRequest(erc1155HAddress, 1, 1, gasFee);
       await wallet.connect(user1).withdraw(1);
 
       await expect(wallet.connect(user1).withdraw(1)).to.be.revertedWith(reason);
@@ -155,30 +149,30 @@ describe('Wallet', async () => {
       const reason = 'Wallet : nothing to withdraw';
 
       await wallet.connect(user1).deposit(1, { value: moderationAmount });
-      const tx = await nftRegistry.connect(moderator).declineRequest(1);
+      const tx = await nftRegistry.connect(owner).declineRequest(1);
 
       await expect(tx).to.changeEtherBalances([walletAddress, daoAddress], [-moderationAmount, +moderationAmount]);
 
       expect((await wallet.balances(1)).wallet).to.equal(user1.address);
       expect((await wallet.balances(1)).locked).to.equal(0);
       expect((await wallet.balances(1)).available).to.equal(0);
-      expect(await wallet.marketPlaceBalance()).to.equal(0);
+      expect(await wallet.plateformBalance()).to.equal(0);
 
       await expect(wallet.connect(user1).withdraw(1)).to.be.revertedWith(reason);
     });
   });
-  describe('withdrawMarketPlaceBalance', async () => {
+  describe('withdrawPlateformBalance', async () => {
     it('withdraw successfully', async () => {
       await wallet.connect(user1).deposit(1, { value: moderationAmount });
-      await nftRegistry.connect(moderator).approveRequest(erc1155HAddress, 1, 1, gasFee);
+      await nftRegistry.connect(owner).approveRequest(erc1155HAddress, 1, 1, gasFee);
 
-      expect(await wallet.marketPlaceBalance()).to.equal(gasFee);
+      expect(await wallet.plateformBalance()).to.equal(gasFee);
 
-      const tx = await wallet.withdrawMarketPlaceBalance();
+      const tx = await wallet.withdrawPlateformBalance();
 
       await expect(tx).to.changeEtherBalances([walletAddress, owner.address], [-gasFee, +gasFee]);
 
-      expect(await wallet.marketPlaceBalance()).to.equal(0);
+      expect(await wallet.plateformBalance()).to.equal(0);
     });
   });
 });

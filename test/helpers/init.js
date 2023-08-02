@@ -124,6 +124,10 @@ async function initContracts() {
 }
 
 async function setDependencies() {
+  // ERC721H
+  await erc721H.setDependencies(await registry.getAddress());
+  // ERC1155H
+  await erc1155H.setDependencies(await registry.getAddress());
   // Wallet
   await wallet.setDependencies(await registry.getAddress());
   // NFTRegistry
