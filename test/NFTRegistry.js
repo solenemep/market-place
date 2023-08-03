@@ -138,16 +138,16 @@ describe('NFTRegistry', async () => {
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(false);
       });
       it('removeWhitelist when burn', async () => {
-        await erc721H.connect(owner).mint(owner.address, 1)
-        await erc1155H.connect(owner).mint(owner.address, 1, 1, web3.utils.asciiToHex(""))
+        await erc721H.connect(owner).mintMock(owner.address, 1);
+        await erc1155H.connect(owner).mintMock(owner.address, 1, 1, web3.utils.asciiToHex(''));
 
         await nftRegistry.connect(whitelister).addWhitelist(erc721HAddress, 1);
         await nftRegistry.connect(whitelister).addWhitelist(erc1155HAddress, 1);
         expect(await nftRegistry.isWhitelisted(erc721HAddress, 1)).to.equal(true);
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(true);
 
-        await erc721H.connect(owner).burn(1)
-        await erc1155H.connect(owner).burn(owner.address, 1, 1)
+        await erc721H.connect(owner).burn(1);
+        await erc1155H.connect(owner).burn(owner.address, 1, 1);
 
         expect(await nftRegistry.isWhitelisted(erc721HAddress, 1)).to.equal(false);
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(false);
@@ -172,12 +172,12 @@ describe('NFTRegistry', async () => {
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 2)).to.equal(false);
       });
       it('removeWhitelist when burnBatch', async () => {
-        await erc1155H.connect(owner).mintBatch(owner.address, [1], [1], web3.utils.asciiToHex(""))
+        await erc1155H.connect(owner).mintMock(owner.address, 1, 1, web3.utils.asciiToHex(''));
 
         await nftRegistry.connect(whitelister).addWhitelistBatch([erc1155HAddress], [1]);
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(true);
 
-        await erc1155H.connect(owner).burnBatch(owner.address, [1], [1])
+        await erc1155H.connect(owner).burnBatch(owner.address, [1], [1]);
 
         expect(await nftRegistry.isWhitelisted(erc1155HAddress, 1)).to.equal(false);
       });

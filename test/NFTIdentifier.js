@@ -45,13 +45,13 @@ describe('NFTIdentifier', async () => {
       expect(await registry.getContract(args.NFT_IDENTIFIER_ID)).to.equal(nftIdentifierAddress);
     });
     it('sets dependencies successfully', async () => {});
-    describe('identification', async () => {
-      it('identifies nft contracts', async () => {
-        expect(await nftIdentifier.isERC721(erc721HAddress)).to.equal(true);
-        expect(await nftIdentifier.isERC1155(erc1155HAddress)).to.equal(true);
-        expect(await nftIdentifier.isERC1155(erc721HAddress)).to.equal(false);
-        expect(await nftIdentifier.isERC721(erc1155HAddress)).to.equal(false);
-      });
+  });
+  describe('identification', async () => {
+    it('identifies nft contracts', async () => {
+      expect(await nftIdentifier.isERC721(erc721HAddress)).to.equal(true);
+      expect(await nftIdentifier.isERC1155(erc1155HAddress)).to.equal(true);
+      expect(await nftIdentifier.isERC1155(erc721HAddress)).to.equal(false);
+      expect(await nftIdentifier.isERC721(erc1155HAddress)).to.equal(false);
     });
   });
 });

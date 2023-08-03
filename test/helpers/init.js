@@ -50,10 +50,10 @@ async function deployContracts() {
   registry = await ethers.deployContract('Registry');
   await registry.waitForDeployment();
   // ERC721H
-  erc721H = await ethers.deployContract('ERC721H', [args.ERC721H_NAME, args.ERC721H_SYMBOL]);
+  erc721H = await ethers.deployContract('ERC721HMock', [args.ERC721H_NAME, args.ERC721H_SYMBOL]);
   await erc721H.waitForDeployment();
   // ERC1155H
-  erc1155H = await ethers.deployContract('ERC1155H', [args.ERC1155H_BASE_TOKEN_URI]);
+  erc1155H = await ethers.deployContract('ERC1155HMock', [args.ERC1155H_BASE_TOKEN_URI]);
   await erc1155H.waitForDeployment();
   // NFTIdentifier
   nftIdentifier = await ethers.deployContract('NFTIdentifier');

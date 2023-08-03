@@ -3,24 +3,55 @@ pragma solidity 0.8.19;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 import "../helpers/Registry.sol";
 import "../interfaces/tokens/IERC721H.sol";
 
 import "../interfaces/INFTRegistry.sol";
 
-contract ERC721H is IERC721H, ERC721URIStorage, Ownable {
+contract ERC721H is IERC721H, ERC721, Ownable, EIP712 {
+    using Counters for Counters.Counter;
+
+    string private constant _SIGNING_DOMAIN_NAME = "ERC721H";
+    string private constant _SIGNING_DOMAIN_VERSION = "1";
+
+    bytes32 private constant _ERC721HDATA_TYPEHASH = keccak256("ERC721HData(address to)");
+
     INFTRegistry public nftRegistry;
 
-    constructor(string memory name, string memory symbol) ERC721(name, symbol) {}
+    Counters.Counter private _tokenIds;
+
+    struct ERC721HData {
+        address to;
+        bytes signature;
+    }
+
+    constructor(
+        string memory name,
+        string memory symbol
+    ) ERC721(name, symbol) EIP712(_SIGNING_DOMAIN_NAME, _SIGNING_DOMAIN_VERSION) {}
 
     function setDependencies(address registryAddress) external onlyOwner {
         nftRegistry = INFTRegistry(Registry(registryAddress).getContract("NFT_REGISTRY"));
     }
 
-    function mint(address to, uint256 tokenId) external onlyOwner {
-        _safeMint(to, tokenId);
+    function recover(ERC721HData calldata erc721HData) public view returns (address) {
+        bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(_ERC721HDATA_TYPEHASH, erc721HData.to)));
+        address signer = ECDSA.recover(digest, erc721HData.signature);
+        return signer;
+    }
+
+    function mint(ERC721HData calldata erc721HData) external onlyOwner returns (uint256 tokenId) {
+        address signer = recover(erc721HData);
+        require(signer == erc721HData.to, "ERC721H : wrong signature");
+
+        tokenId = _tokenIds.current();
+        _safeMint(signer, tokenId);
+
+        _tokenIds.increment();
     }
 
     /**
