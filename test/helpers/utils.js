@@ -33,7 +33,7 @@ async function getCosts(tx) {
   );
 }
 
-async function signERC721H(contract, signer) {
+async function signERC721H(contract, signer, tokenURI) {
   const SIGNING_DOMAIN_NAME = 'ERC721H';
   const SIGNING_DOMAIN_VERSION = '1';
   const chainId = hre.network.config.chainId;
@@ -45,10 +45,13 @@ async function signERC721H(contract, signer) {
     chainId,
   };
   const types = {
-    ERC721HData: [{ name: 'to', type: 'address' }],
+    ERC721HData: [
+      { name: 'to', type: 'address' },
+      { name: 'tokenURI', type: 'string' },
+    ],
   };
   const signerAddress = await signer.getAddress();
-  const erc721HData = { to: signerAddress };
+  const erc721HData = { to: signerAddress, tokenURI: tokenURI };
 
   const signature = await signer.signTypedData(domain, types, erc721HData);
   return {
@@ -57,7 +60,7 @@ async function signERC721H(contract, signer) {
   };
 }
 
-async function signERC1155H(contract, signer, value) {
+async function signERC1155H(contract, signer, value, tokenURI) {
   const SIGNING_DOMAIN_NAME = 'ERC1155H';
   const SIGNING_DOMAIN_VERSION = '1';
   const chainId = hre.network.config.chainId;
@@ -72,10 +75,11 @@ async function signERC1155H(contract, signer, value) {
     ERC1155HData: [
       { name: 'to', type: 'address' },
       { name: 'value', type: 'uint256' },
+      { name: 'tokenURI', type: 'string' },
     ],
   };
   const signerAddress = await signer.getAddress();
-  const erc1155HData = { to: signerAddress, value: value };
+  const erc1155HData = { to: signerAddress, value: value, tokenURI: tokenURI };
 
   const signature = await signer.signTypedData(domain, types, erc1155HData);
   return {

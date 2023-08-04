@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 import "../helpers/Registry.sol";
@@ -12,13 +12,14 @@ import "../interfaces/tokens/IERC1155H.sol";
 
 import "../interfaces/INFTRegistry.sol";
 
-contract ERC1155H is IERC1155H, ERC1155, Ownable, EIP712 {
+contract ERC1155H is IERC1155H, ERC1155URIStorage, Ownable, EIP712 {
     using Counters for Counters.Counter;
 
     string private constant _SIGNING_DOMAIN_NAME = "ERC1155H";
     string private constant _SIGNING_DOMAIN_VERSION = "1";
 
-    bytes32 private constant _ERC1155HDATA_TYPEHASH = keccak256("ERC1155HData(address to,uint256 value)");
+    bytes32 private constant _ERC1155HDATA_TYPEHASH =
+        keccak256("ERC1155HData(address to,uint256 value,string tokenURI)");
 
     INFTRegistry public nftRegistry;
 
@@ -27,6 +28,7 @@ contract ERC1155H is IERC1155H, ERC1155, Ownable, EIP712 {
     struct ERC1155HData {
         address to;
         uint256 value;
+        string tokenURI;
         bytes signature;
     }
 
@@ -38,7 +40,14 @@ contract ERC1155H is IERC1155H, ERC1155, Ownable, EIP712 {
 
     function recover(ERC1155HData calldata erc1155HData) public view returns (address) {
         bytes32 digest = _hashTypedDataV4(
-            keccak256(abi.encode(_ERC1155HDATA_TYPEHASH, erc1155HData.to, erc1155HData.value))
+            keccak256(
+                abi.encode(
+                    _ERC1155HDATA_TYPEHASH,
+                    erc1155HData.to,
+                    erc1155HData.value,
+                    keccak256(bytes(erc1155HData.tokenURI))
+                )
+            )
         );
         address signer = ECDSA.recover(digest, erc1155HData.signature);
         return signer;
@@ -50,6 +59,7 @@ contract ERC1155H is IERC1155H, ERC1155, Ownable, EIP712 {
 
         tokenId = _tokenIds.current();
         _mint(signer, tokenId, erc1155HData.value, "");
+        _setURI(tokenId, erc1155HData.tokenURI);
 
         _tokenIds.increment();
     }

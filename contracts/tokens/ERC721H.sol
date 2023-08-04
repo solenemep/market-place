@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 import "../helpers/Registry.sol";
@@ -12,13 +12,13 @@ import "../interfaces/tokens/IERC721H.sol";
 
 import "../interfaces/INFTRegistry.sol";
 
-contract ERC721H is IERC721H, ERC721, Ownable, EIP712 {
+contract ERC721H is IERC721H, ERC721URIStorage, Ownable, EIP712 {
     using Counters for Counters.Counter;
 
     string private constant _SIGNING_DOMAIN_NAME = "ERC721H";
     string private constant _SIGNING_DOMAIN_VERSION = "1";
 
-    bytes32 private constant _ERC721HDATA_TYPEHASH = keccak256("ERC721HData(address to)");
+    bytes32 private constant _ERC721HDATA_TYPEHASH = keccak256("ERC721HData(address to,string tokenURI)");
 
     INFTRegistry public nftRegistry;
 
@@ -26,6 +26,7 @@ contract ERC721H is IERC721H, ERC721, Ownable, EIP712 {
 
     struct ERC721HData {
         address to;
+        string tokenURI;
         bytes signature;
     }
 
@@ -39,7 +40,9 @@ contract ERC721H is IERC721H, ERC721, Ownable, EIP712 {
     }
 
     function recover(ERC721HData calldata erc721HData) public view returns (address) {
-        bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(_ERC721HDATA_TYPEHASH, erc721HData.to)));
+        bytes32 digest = _hashTypedDataV4(
+            keccak256(abi.encode(_ERC721HDATA_TYPEHASH, erc721HData.to, keccak256(bytes(erc721HData.tokenURI))))
+        );
         address signer = ECDSA.recover(digest, erc721HData.signature);
         return signer;
     }
@@ -50,6 +53,7 @@ contract ERC721H is IERC721H, ERC721, Ownable, EIP712 {
 
         tokenId = _tokenIds.current();
         _safeMint(signer, tokenId);
+        _setTokenURI(tokenId, erc721HData.tokenURI);
 
         _tokenIds.increment();
     }

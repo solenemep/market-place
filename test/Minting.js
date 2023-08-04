@@ -55,15 +55,17 @@ describe('Minting', async () => {
     });
   });
   describe('ERC721H minting', async () => {
+    const tokenURI = 'tokenURI';
+
     it('mint with correct signature', async () => {
-      const data = await signERC721H(erc721HAddress, signer);
+      const data = await signERC721H(erc721HAddress, signer, tokenURI);
 
       const recover = await erc721H.recover(data);
       expect(recover).to.equal(signerAddress);
 
       expect(await erc721H.balanceOf(signerAddress)).to.equal(0);
 
-      const erc721HData = { to: data.to, signature: data.signature };
+      const erc721HData = { to: data.to, tokenURI: tokenURI, signature: data.signature };
       await erc721H.connect(owner).mint(erc721HData);
 
       expect(await erc721H.balanceOf(signerAddress)).to.equal(1);
@@ -72,25 +74,38 @@ describe('Minting', async () => {
     it('reverts mint with incorrect signature - wrong to', async () => {
       const reason = 'ERC721H : wrong signature';
 
-      const data = await signERC721H(erc721HAddress, signer);
+      const data = await signERC721H(erc721HAddress, signer, tokenURI);
 
       const recover = await erc721H.recover(data);
       expect(recover).to.equal(signerAddress);
 
-      const erc721HData = { to: user1.address, signature: data.signature };
+      const erc721HData = { to: user1.address, tokenURI: tokenURI, signature: data.signature };
+      await expect(erc721H.connect(owner).mint(erc721HData)).to.be.revertedWith(reason);
+    });
+    it('reverts mint with incorrect signature - wrong tokenURI', async () => {
+      const reason = 'ERC721H : wrong signature';
+
+      const data = await signERC721H(erc721HAddress, signer, tokenURI);
+
+      const recover = await erc721H.recover(data);
+      expect(recover).to.equal(signerAddress);
+
+      const erc721HData = { to: signerAddress, tokenURI: '', signature: data.signature };
       await expect(erc721H.connect(owner).mint(erc721HData)).to.be.revertedWith(reason);
     });
   });
   describe('ERC1155H minting', async () => {
+    const tokenURI = 'tokenURI';
+
     it('mint with correct signature', async () => {
-      const data = await signERC1155H(erc1155HAddress, signer, 1);
+      const data = await signERC1155H(erc1155HAddress, signer, 1, tokenURI);
 
       const recover = await erc1155H.recover(data);
       expect(recover).to.equal(signerAddress);
 
       expect(await erc1155H.balanceOf(signerAddress, 0)).to.equal(0);
 
-      const erc1155HData = { to: data.to, value: data.value, signature: data.signature };
+      const erc1155HData = { to: data.to, value: data.value, tokenURI: tokenURI, signature: data.signature };
       await erc1155H.connect(owner).mint(erc1155HData);
 
       expect(await erc1155H.balanceOf(signerAddress, 0)).to.equal(1);
@@ -98,23 +113,34 @@ describe('Minting', async () => {
     it('reverts mint with incorrect signature - wrong to', async () => {
       const reason = 'ERC1155H : wrong signature';
 
-      const data = await signERC1155H(erc1155HAddress, signer, 1);
+      const data = await signERC1155H(erc1155HAddress, signer, 1, tokenURI);
 
       const recover = await erc1155H.recover(data);
       expect(recover).to.equal(signerAddress);
 
-      const erc1155HData = { to: user1.address, value: 1, signature: data.signature };
+      const erc1155HData = { to: user1.address, value: 1, tokenURI: tokenURI, signature: data.signature };
       await expect(erc1155H.connect(owner).mint(erc1155HData)).to.be.revertedWith(reason);
     });
     it('reverts mint with incorrect signature - wrong value', async () => {
       const reason = 'ERC1155H : wrong signature';
 
-      const data = await signERC1155H(erc1155HAddress, signer, 1);
+      const data = await signERC1155H(erc1155HAddress, signer, 1, tokenURI);
 
       const recover = await erc1155H.recover(data);
       expect(recover).to.equal(signerAddress);
 
-      const erc1155HData = { to: data.to, value: 2, signature: data.signature };
+      const erc1155HData = { to: data.to, value: 2, tokenURI: tokenURI, signature: data.signature };
+      await expect(erc1155H.connect(owner).mint(erc1155HData)).to.be.revertedWith(reason);
+    });
+    it('reverts mint with incorrect signature - wrong tokenURI', async () => {
+      const reason = 'ERC1155H : wrong signature';
+
+      const data = await signERC1155H(erc1155HAddress, signer, 1, tokenURI);
+
+      const recover = await erc1155H.recover(data);
+      expect(recover).to.equal(signerAddress);
+
+      const erc1155HData = { to: data.to, value: 1, tokenURI: '', signature: data.signature };
       await expect(erc1155H.connect(owner).mint(erc1155HData)).to.be.revertedWith(reason);
     });
   });
