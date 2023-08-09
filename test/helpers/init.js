@@ -68,7 +68,7 @@ async function deployImplementations() {
   nftRegistry = await ethers.deployContract('NFTRegistry');
   await nftRegistry.waitForDeployment();
   // Listing
-  listing = await ethers.deployContract('Listing');
+  listing = await ethers.deployContract('ListingMock');
   await listing.waitForDeployment();
   // Auction
   auction = await ethers.deployContract('Auction');
@@ -105,7 +105,7 @@ async function deployProxies() {
   const NFTRegistry = await hre.ethers.getContractFactory('NFTRegistry');
   nftRegistry = NFTRegistry.attach(await registry.getContract(args.NFT_REGISTRY_ID));
   // Listing
-  const Listing = await hre.ethers.getContractFactory('Listing');
+  const Listing = await hre.ethers.getContractFactory('ListingMock');
   listing = Listing.attach(await registry.getContract(args.LISTING_ID));
   // Auction
   const Auction = await hre.ethers.getContractFactory('Auction');

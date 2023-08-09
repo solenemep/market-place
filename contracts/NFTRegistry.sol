@@ -13,6 +13,7 @@ import "./interfaces/INFTRegistry.sol";
 
 import "./interfaces/tokens/IERC721H.sol";
 import "./interfaces/tokens/IERC1155H.sol";
+import "./interfaces/IListing.sol";
 import "./interfaces/IWallet.sol";
 
 /// @title NFTRegistry
@@ -30,6 +31,7 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
 
     IERC721H public erc721H;
     IERC1155H public erc1155H;
+    IListing public listing;
     IWallet public wallet;
 
     EnumerableSet.AddressSet internal _nftAddresses; // smart contracts that carry whitelisted NFT
@@ -53,6 +55,7 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     function setDependencies(address registryAddress) external onlyOwner {
         erc721H = IERC721H(Registry(registryAddress).getContract("ERC721H"));
         erc1155H = IERC1155H(Registry(registryAddress).getContract("ERC1155H"));
+        listing = IListing(Registry(registryAddress).getContract(("LISTING")));
         wallet = IWallet(Registry(registryAddress).getContract(("WALLET")));
     }
 
@@ -68,19 +71,16 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
         }
     }
 
-    function countNFTAddresses() external view override returns (uint256) {
+    function countNFTAddresses() external view returns (uint256) {
         return _nftAddresses.length();
     }
 
-    function countNFTIDs(address nftAddress) external view override returns (uint256) {
+    function countNFTIDs(address nftAddress) external view returns (uint256) {
         return _nftIDs[nftAddress].length();
     }
 
     /// @notice use with limit = countNFTAddresses()
-    function getNFTAddresses(
-        uint256 offset,
-        uint256 limit
-    ) external view override returns (address[] memory nftAddresses) {
+    function getNFTAddresses(uint256 offset, uint256 limit) external view returns (address[] memory nftAddresses) {
         uint256 count = _nftAddresses.length();
         uint256 to = (offset.tryAdd(limit)).min(count).max(offset);
 
@@ -97,7 +97,7 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
         address nftAddress,
         uint256 offset,
         uint256 limit
-    ) external view override returns (uint256[] memory nftIDs) {
+    ) external view returns (uint256[] memory nftIDs) {
         uint256 count = _nftIDs[nftAddress].length();
         uint256 to = (offset.tryAdd(limit)).min(count).max(offset);
 
@@ -109,11 +109,11 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
         }
     }
 
-    function addWhitelist(address nftAddress, uint256 nftID) external override onlyAutorized {
+    function addWhitelist(address nftAddress, uint256 nftID) external onlyAutorized {
         _addWhitelist(nftAddress, nftID);
     }
 
-    function addWhitelistBatch(address[] memory nftAddresses, uint256[] memory nftIDs) external override onlyAutorized {
+    function addWhitelistBatch(address[] memory nftAddresses, uint256[] memory nftIDs) external onlyAutorized {
         require(nftAddresses.length == nftIDs.length, "NFTRegistry : length mismatch");
         require(nftAddresses.length < MAX_WHITELIST, "NFTRegistry : too many NFTs");
 
@@ -123,10 +123,8 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     }
 
     function _addWhitelist(address nftAddress, uint256 nftID) internal {
-        if (!isWhitelisted(nftAddress, nftID)) {
-            _nftAddresses.add(nftAddress);
-            _nftIDs[nftAddress].add(nftID);
-        }
+        _nftAddresses.add(nftAddress);
+        _nftIDs[nftAddress].add(nftID);
     }
 
     function removeWhitelist(address nftAddress, uint256 nftID) external override onlyAutorized {
@@ -146,10 +144,9 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     }
 
     function _removeWhitelist(address nftAddress, uint256 nftID) internal {
-        if (isWhitelisted(nftAddress, nftID)) {
-            _nftAddresses.remove(nftAddress);
-            _nftIDs[nftAddress].remove(nftID);
-        }
+        _nftAddresses.remove(nftAddress);
+        _nftIDs[nftAddress].remove(nftID);
+        listing.unlistFixedSale(nftAddress, nftID);
     }
 
     // ====================

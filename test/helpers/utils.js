@@ -88,6 +88,10 @@ async function signERC1155H(contract, signer, value, tokenURI) {
   };
 }
 
+async function getCurrentBlockTimestamp() {
+  return (await web3.eth.getBlock('latest')).timestamp;
+}
+
 module.exports = {
   toWei,
   ZERO_ADDRESS,
@@ -97,4 +101,5 @@ module.exports = {
   getCosts,
   signERC721H,
   signERC1155H,
+  getCurrentBlockTimestamp,
 };
