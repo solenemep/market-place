@@ -16,7 +16,6 @@ describe('Listing', async () => {
   let registry, registryAddress;
   let erc721H, erc721HAddress;
   let erc1155H, erc1155HAddress;
-  let nftIdentifier, nftIdentifierAddress;
   let nftRegistry, nftRegistryAddress;
   let listing, listingAddress;
   let auction, auctionAddress;
@@ -51,9 +50,6 @@ describe('Listing', async () => {
     erc1155H = setups.erc1155H;
     erc1155HAddress = await erc1155H.getAddress();
 
-    nftIdentifier = setups.nftIdentifier;
-    nftIdentifierAddress = await nftIdentifier.getAddress();
-
     nftRegistry = setups.nftRegistry;
     nftRegistryAddress = await nftRegistry.getAddress();
 
@@ -77,7 +73,6 @@ describe('Listing', async () => {
       expect(await registry.getContract(args.LISTING_ID)).to.equal(listingAddress);
     });
     it('sets dependencies successfully', async () => {
-      expect(await listing.nftIdentifier()).to.equal(nftIdentifierAddress);
       expect(await listing.nftRegistry()).to.equal(nftRegistryAddress);
       expect(await listing.auction()).to.equal(auctionAddress);
     });

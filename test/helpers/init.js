@@ -56,7 +56,7 @@ async function deployContracts() {
   erc1155H = await ethers.deployContract('ERC1155HMock', [args.ERC1155H_BASE_TOKEN_URI]);
   await erc1155H.waitForDeployment();
   // NFTIdentifier
-  nftIdentifier = await ethers.deployContract('NFTIdentifier');
+  nftIdentifier = await ethers.deployContract('NFTIdentifierMock');
   await nftIdentifier.waitForDeployment();
 }
 
@@ -80,8 +80,6 @@ async function addContracts() {
   await registry.addContract(args.ERC721H_ID, await erc721H.getAddress());
   // ERC1155H
   await registry.addContract(args.ERC1155H_ID, await erc1155H.getAddress());
-  // NFTIdentifier
-  await registry.addContract(args.NFT_IDENTIFIER_ID, await nftIdentifier.getAddress());
   // DAO
   await registry.addContract(args.DAO_ID, args.DAO_ADDRESS);
 }
@@ -99,16 +97,16 @@ async function addProxies() {
 
 async function deployProxies() {
   // Wallet
-  const Wallet = await hre.ethers.getContractFactory('Wallet');
+  const Wallet = await ethers.getContractFactory('Wallet');
   wallet = Wallet.attach(await registry.getContract(args.WALLET_ID));
   // NFTRegistry
-  const NFTRegistry = await hre.ethers.getContractFactory('NFTRegistry');
+  const NFTRegistry = await ethers.getContractFactory('NFTRegistry');
   nftRegistry = NFTRegistry.attach(await registry.getContract(args.NFT_REGISTRY_ID));
   // Listing
-  const Listing = await hre.ethers.getContractFactory('ListingMock');
+  const Listing = await ethers.getContractFactory('ListingMock');
   listing = Listing.attach(await registry.getContract(args.LISTING_ID));
   // Auction
-  const Auction = await hre.ethers.getContractFactory('Auction');
+  const Auction = await ethers.getContractFactory('Auction');
   auction = Auction.attach(await registry.getContract(args.AUCTION_ID));
 }
 

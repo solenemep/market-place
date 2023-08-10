@@ -12,6 +12,8 @@ import "../interfaces/tokens/IERC1155H.sol";
 
 import "../interfaces/INFTRegistry.sol";
 
+/// @author @solenemep
+
 contract ERC1155H is IERC1155H, ERC1155URIStorage, Ownable, EIP712 {
     using Counters for Counters.Counter;
 

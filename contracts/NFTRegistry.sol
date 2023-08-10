@@ -16,6 +16,7 @@ import "./interfaces/tokens/IERC1155H.sol";
 import "./interfaces/IListing.sol";
 import "./interfaces/IWallet.sol";
 
+/// @author @solenemep
 /// @title NFTRegistry
 /// @notice This contract carries all minting request and whitelist logic
 

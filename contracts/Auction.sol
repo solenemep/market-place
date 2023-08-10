@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./helpers/Registry.sol";
 import "./interfaces/IAuction.sol";
 
+/// @author @solenemep
 /// @title Auction
 /// @notice This contract carries english auction selling logic
 /// @notice It is connected with Listing.sol
