@@ -8,16 +8,19 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./helpers/Registry.sol";
 import "./interfaces/IListing.sol";
 
-import "./interfaces/INFTIdentifier.sol";
 import "./interfaces/INFTRegistry.sol";
 import "./interfaces/IAuction.sol";
 
+import "./libraries/NFTIdentifier.sol";
+
+/// @author @solenemep
 /// @title Listing
 /// @notice This contract carries all listing and buying at fixed price logic
 /// @notice It is connected with Auction.sol
 
 contract Listing is IListing, OwnableUpgradeable {
-    INFTIdentifier public nftIdentifier;
+    using NFTIdentifier for address;
+
     INFTRegistry public nftRegistry;
     IAuction public auction;
 
@@ -29,7 +32,6 @@ contract Listing is IListing, OwnableUpgradeable {
     }
 
     function setDependencies(address registryAddress) external onlyOwner {
-        nftIdentifier = INFTIdentifier(Registry(registryAddress).getContract("NFT_IDENTIFIER"));
         nftRegistry = INFTRegistry(Registry(registryAddress).getContract("NFT_REGISTRY"));
         auction = IAuction(Registry(registryAddress).getContract("AUCTION"));
     }
@@ -52,10 +54,10 @@ contract Listing is IListing, OwnableUpgradeable {
     // TODO quantity in param ?
     function listFixedSale(address nftAddress, uint256 nftID, uint256 price, uint256 expiration) external {
         require(nftRegistry.isWhitelisted(nftAddress, nftID), "Listing : not whitelisted");
-        if (nftIdentifier.isERC721(nftAddress)) {
+        if (NFTIdentifier.isERC721(nftAddress)) {
             require(IERC721(nftAddress).isApprovedForAll(msg.sender, address(this)), "Listing : not approved");
             _listFixedSale(nftAddress, nftID, price, expiration, 1);
-        } else if (nftIdentifier.isERC1155(nftAddress)) {
+        } else if (NFTIdentifier.isERC1155(nftAddress)) {
             require(IERC1155(nftAddress).isApprovedForAll(msg.sender, address(this)), "Listing : not approved");
             uint256 quantity = IERC1155(nftAddress).balanceOf(msg.sender, nftID);
             _listFixedSale(nftAddress, nftID, price, expiration, quantity);
@@ -77,8 +79,8 @@ contract Listing is IListing, OwnableUpgradeable {
     function unlistFixedSale(address nftAddress, uint256 nftID) external override {
         require(
             msg.sender == address(nftRegistry) ||
-                (nftIdentifier.isERC721(nftAddress) && msg.sender == IERC721(nftAddress).ownerOf(nftID)) ||
-                (nftIdentifier.isERC1155(nftAddress) &&
+                (NFTIdentifier.isERC721(nftAddress) && msg.sender == IERC721(nftAddress).ownerOf(nftID)) ||
+                (NFTIdentifier.isERC1155(nftAddress) &&
                     IERC1155(nftAddress).balanceOf(msg.sender, nftID) == _fixedSaleListing[nftAddress][nftID].quantity),
             "Listing : not allowed"
         );

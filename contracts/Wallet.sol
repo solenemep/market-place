@@ -8,6 +8,7 @@ import "./interfaces/IWallet.sol";
 
 import "./interfaces/INFTRegistry.sol";
 
+/// @author @solenemep
 /// @title Wallet
 /// @notice This contract carries all deposit and withdraw logic
 

@@ -8,7 +8,6 @@ describe('NFTRegistry', async () => {
   let registry, registryAddress;
   let erc721H, erc721HAddress;
   let erc1155H, erc1155HAddress;
-  let nftIdentifier, nftIdentifierAddress;
   let nftRegistry, nftRegistryAddress;
   let wallet, walletAddress;
 
@@ -40,9 +39,6 @@ describe('NFTRegistry', async () => {
 
     erc1155H = setups.erc1155H;
     erc1155HAddress = await erc1155H.getAddress();
-
-    nftIdentifier = setups.nftIdentifier;
-    nftIdentifierAddress = await nftIdentifier.getAddress();
 
     nftRegistry = setups.nftRegistry;
     nftRegistryAddress = await nftRegistry.getAddress();

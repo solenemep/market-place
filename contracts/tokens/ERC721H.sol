@@ -12,6 +12,8 @@ import "../interfaces/tokens/IERC721H.sol";
 
 import "../interfaces/INFTRegistry.sol";
 
+/// @author @solenemep
+
 contract ERC721H is IERC721H, ERC721URIStorage, Ownable, EIP712 {
     using Counters for Counters.Counter;
 
