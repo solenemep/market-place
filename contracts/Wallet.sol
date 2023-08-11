@@ -69,7 +69,7 @@ contract Wallet is IWallet, OwnableUpgradeable {
         emit Withdrawn(mintingID, msg.sender, amount);
     }
 
-    function updateBalance(uint256 mintingID, uint256 gasFee, bool unlock) external onlyAutorized {
+    function updateBalance(uint256 mintingID, uint256 gasFee, bool unlock) external override onlyAutorized {
         uint256 amount = balances[mintingID].locked;
         balances[mintingID].locked = 0;
         if (amount > 0) {
