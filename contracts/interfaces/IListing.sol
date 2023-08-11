@@ -15,4 +15,6 @@ interface IListing {
     }
 
     function unlistFixedSale(address nftAddress, uint256 nftID) external;
+
+    function unlistAuctionSale(address nftAddress, uint256 nftID) external;
 }

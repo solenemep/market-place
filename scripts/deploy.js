@@ -139,16 +139,16 @@ async function deployProxies() {
 
 async function initContracts() {
   // Wallet
-  tx = await wallet.__Wallet_init();
+  tx = await wallet.initialize();
   await tx.wait();
   // NFTRegistry
-  tx = await nftRegistry.__NFTRegistry_init();
+  tx = await nftRegistry.initialize();
   await tx.wait();
   // Listing
-  tx = await listing.__Listing_init();
+  tx = await listing.initialize();
   await tx.wait();
   // Auction
-  tx = await auction.__Auction_init();
+  tx = await auction.initialize();
   await tx.wait();
 }
 

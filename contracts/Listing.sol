@@ -27,7 +27,12 @@ contract Listing is IListing, OwnableUpgradeable {
     mapping(address => mapping(uint256 => FixedSaleListing)) internal _fixedSaleListing;
     mapping(address => mapping(uint256 => uint256)) internal _auctionSaleListing; // id ?
 
-    function __Listing_init() external initializer {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize() external initializer {
         __Ownable_init();
     }
 
@@ -50,7 +55,12 @@ contract Listing is IListing, OwnableUpgradeable {
     // ||   FIXED PRICE   ||
     // =====================
 
-    /// @notice user should approve Listing contract to dispose of his NFT
+    /// @notice list a NFT on fixed price sale
+    /// @dev user should approve Listing contract to dispose of his NFT
+    /// @param nftAddress contract address of NFT to list
+    /// @param nftID ID of NFT to list
+    /// @param price selling price of NFT to list
+    /// @param expiration expiration block of listing
     // TODO quantity in param ?
     function listFixedSale(address nftAddress, uint256 nftID, uint256 price, uint256 expiration) external {
         require(nftRegistry.isWhitelisted(nftAddress, nftID), "Listing : not whitelisted");
@@ -76,6 +86,9 @@ contract Listing is IListing, OwnableUpgradeable {
         _fixedSaleListing[nftAddress][nftID].quantity = quantity;
     }
 
+    /// @notice unlist a NFT from fixed price sale
+    /// @param nftAddress contract address of NFT to unlist
+    /// @param nftID ID of NFT to unlist
     function unlistFixedSale(address nftAddress, uint256 nftID) external override {
         require(
             msg.sender == address(nftRegistry) ||
@@ -93,7 +106,16 @@ contract Listing is IListing, OwnableUpgradeable {
     // ||   AUCTION   ||
     // =================
 
+    /// @notice list a NFT on english auction sale
+    /// @notice user should approve Listing contract to dispose of his NFT
+    /// @param nftAddress contract address of NFT to list
+    /// @param nftID ID of NFT to list
     function listAuctionSale(address nftAddress, uint256 nftID) external {
         require(nftRegistry.isWhitelisted(nftAddress, nftID), "Listing : not whitelisted");
     }
+
+    /// @notice unlist a NFT from english auction sale
+    /// @param nftAddress contract address of NFT to unlist
+    /// @param nftID ID of NFT to unlist
+    function unlistAuctionSale(address nftAddress, uint256 nftID) external override {}
 }

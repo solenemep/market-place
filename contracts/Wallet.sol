@@ -19,7 +19,7 @@ contract Wallet is IWallet, OwnableUpgradeable {
 
     address public daoAddress;
 
-    mapping(uint256 => Balance) public balances; // minting request id -> locked / unlocked funds
+    mapping(uint256 => Balance) public balances;
     uint256 public plateformBalance;
 
     event Deposited(uint256 mintingID, address indexed sender, uint256 amount);
@@ -30,7 +30,12 @@ contract Wallet is IWallet, OwnableUpgradeable {
         _;
     }
 
-    function __Wallet_init() external initializer {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize() external initializer {
         __Ownable_init();
     }
 
@@ -39,6 +44,9 @@ contract Wallet is IWallet, OwnableUpgradeable {
         daoAddress = Registry(registryAddress).getContract("DAO");
     }
 
+    /// @notice deposit funds for particular minting request
+    /// @dev user should send amount in msg.value
+    /// @param mintingID ID of minting request
     function deposit(uint256 mintingID) external payable {
         require(
             balances[mintingID].wallet == address(0) || balances[mintingID].wallet == msg.sender,
@@ -55,6 +63,8 @@ contract Wallet is IWallet, OwnableUpgradeable {
         emit Deposited(mintingID, sender, amount);
     }
 
+    /// @notice withdraw funds for particular minting request
+    /// @param mintingID ID of minting request
     function withdraw(uint256 mintingID) external {
         require(balances[mintingID].wallet == msg.sender, "Wallet : not autorised");
         require(balances[mintingID].available > 0, "Wallet : nothing to withdraw");
@@ -70,6 +80,10 @@ contract Wallet is IWallet, OwnableUpgradeable {
         emit Withdrawn(mintingID, msg.sender, amount);
     }
 
+    /// @dev called when approve or decline to update balances in contract
+    /// @param mintingID ID of minting request
+    /// @param gasFee cost of minting transaction
+    /// @param unlock true if approved, false if declined
     function updateBalance(uint256 mintingID, uint256 gasFee, bool unlock) external override onlyAutorized {
         uint256 amount = balances[mintingID].locked;
         balances[mintingID].locked = 0;
@@ -83,6 +97,7 @@ contract Wallet is IWallet, OwnableUpgradeable {
         }
     }
 
+    /// @notice withdraw refunds of minting transaction costs
     function withdrawPlateformBalance() external onlyOwner {
         uint256 amount = plateformBalance;
         plateformBalance = 0;

@@ -46,7 +46,12 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
         _;
     }
 
-    function __NFTRegistry_init() external initializer {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize() external initializer {
         __Ownable_init();
         __AccessControl_init();
 
@@ -110,10 +115,16 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
         }
     }
 
+    /// @notice whitelist a NFT
+    /// @param nftAddress contract address of NFT to whitelist
+    /// @param nftID ID of NFT to whitelist
     function addWhitelist(address nftAddress, uint256 nftID) external onlyAutorized {
         _addWhitelist(nftAddress, nftID);
     }
 
+    /// @notice whitelist a batch of NFT
+    /// @param nftAddresses contract address array of NFT to whitelist
+    /// @param nftIDs ID array of NFT to whitelist
     function addWhitelistBatch(address[] memory nftAddresses, uint256[] memory nftIDs) external onlyAutorized {
         require(nftAddresses.length == nftIDs.length, "NFTRegistry : length mismatch");
         require(nftAddresses.length < MAX_WHITELIST, "NFTRegistry : too many NFTs");
@@ -128,10 +139,16 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
         _nftIDs[nftAddress].add(nftID);
     }
 
+    /// @notice unwhitelist a NFT
+    /// @param nftAddress contract address of NFT to unwhitelist
+    /// @param nftID ID of NFT to unwhitelist
     function removeWhitelist(address nftAddress, uint256 nftID) external override onlyAutorized {
         _removeWhitelist(nftAddress, nftID);
     }
 
+    /// @notice unwhitelist a batch of NFT
+    /// @param nftAddresses contract address array of NFT to unwhitelist
+    /// @param nftIDs ID array of NFT to unwhitelist
     function removeWhitelistBatch(
         address[] memory nftAddresses,
         uint256[] memory nftIDs
@@ -154,16 +171,26 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     // ||   MODERATION   ||
     // ====================
 
-    /// @notice token has been minted and gas fee calculated
+    /// @notice approve a minting request
+    /// @dev token has been minted and gas fee calculated
+    /// @param nftAddress contract address of NFT to whitelist
+    /// @param nftID ID NFT to whitelist
+    /// @param mintingID ID of minting request
+    /// @param gasFee cost of minting transaction
     function approveRequest(address nftAddress, uint256 nftID, uint256 mintingID, uint256 gasFee) external onlyOwner {
         _addWhitelist(nftAddress, nftID);
         wallet.updateBalance(mintingID, gasFee, true);
     }
 
+    /// @notice hard decline a minting request
+    /// @param mintingID ID of minting request
     function declineRequest(uint256 mintingID) external onlyOwner {
         wallet.updateBalance(mintingID, 0, false);
     }
 
+    /// @notice revoke a minting request
+    /// @param nftAddress contract address of NFT to unwhitelist
+    /// @param nftID ID NFT to unwhitelist
     function revokeRequest(address nftAddress, uint256 nftID) external onlyOwner {
         _removeWhitelist(nftAddress, nftID);
     }

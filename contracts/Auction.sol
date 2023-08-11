@@ -12,7 +12,12 @@ import "./interfaces/IAuction.sol";
 /// @notice It is connected with Listing.sol
 
 contract Auction is IAuction, OwnableUpgradeable {
-    function __Auction_init() external initializer {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize() external initializer {
         __Ownable_init();
     }
 
