@@ -13,7 +13,6 @@ import "./interfaces/INFTRegistry.sol";
 
 import "./interfaces/tokens/IERC721H.sol";
 import "./interfaces/tokens/IERC1155H.sol";
-import "./interfaces/IListing.sol";
 import "./interfaces/IWallet.sol";
 
 /// @author @solenemep
@@ -32,7 +31,6 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
 
     IERC721H public erc721H;
     IERC1155H public erc1155H;
-    IListing public listing;
     IWallet public wallet;
 
     EnumerableSet.AddressSet internal _nftAddresses; // smart contracts that carry whitelisted NFT
@@ -61,7 +59,6 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     function setDependencies(address registryAddress) external onlyOwner {
         erc721H = IERC721H(Registry(registryAddress).getContract("ERC721H"));
         erc1155H = IERC1155H(Registry(registryAddress).getContract("ERC1155H"));
-        listing = IListing(Registry(registryAddress).getContract(("LISTING")));
         wallet = IWallet(Registry(registryAddress).getContract(("WALLET")));
     }
 
@@ -69,20 +66,18 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     // ||   WHITELISTING   ||
     // ======================
 
-    function isWhitelisted(address nftAddress, uint256 nftID) public view override returns (bool) {
-        if (!_nftAddresses.contains(nftAddress)) {
-            return false;
-        } else {
-            return _nftIDs[nftAddress].contains(nftID);
+    function isWhitelisted(address nftAddress, uint256 nftID) public view override returns (bool whitelisted) {
+        if (_nftAddresses.contains(nftAddress)) {
+            whitelisted = _nftIDs[nftAddress].contains(nftID);
         }
     }
 
-    function countNFTAddresses() external view returns (uint256) {
-        return _nftAddresses.length();
+    function countNFTAddresses() external view returns (uint256 count) {
+        count = _nftAddresses.length();
     }
 
-    function countNFTIDs(address nftAddress) external view returns (uint256) {
-        return _nftIDs[nftAddress].length();
+    function countNFTIDs(address nftAddress) external view returns (uint256 count) {
+        count = _nftIDs[nftAddress].length();
     }
 
     /// @notice use with limit = countNFTAddresses()
@@ -164,7 +159,6 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     function _removeWhitelist(address nftAddress, uint256 nftID) internal {
         _nftAddresses.remove(nftAddress);
         _nftIDs[nftAddress].remove(nftID);
-        listing.unlistFixedSale(nftAddress, nftID);
     }
 
     // ====================

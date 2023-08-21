@@ -1,20 +1,25 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.19;
 
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
 interface IListing {
     enum List {
-        NONE,
         FIXED_SALE,
         AUCTION_SALE
     }
 
     struct FixedSaleListing {
+        address nftAddress;
+        uint256 nftID;
+        address owner;
         uint256 price;
         uint256 expiration;
         uint256 quantity;
     }
 
-    function unlistFixedSale(address nftAddress, uint256 nftID) external;
-
-    function unlistAuctionSale(address nftAddress, uint256 nftID) external;
+    struct ERC1155FixedSaleID {
+        uint256 totalQuantity;
+        EnumerableSet.UintSet erc1155FixedSaleListingIDs;
+    }
 }

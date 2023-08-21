@@ -1,6 +1,7 @@
 const BigNumber = require('bignumber.js');
 const { takeSnapshot } = require('@nomicfoundation/hardhat-network-helpers');
 const { toWei } = web3.utils;
+const { time } = require('@openzeppelin/test-helpers');
 const { ZERO_ADDRESS } = require('@openzeppelin/test-helpers/src/constants.js');
 
 let _snapshot;
@@ -92,6 +93,10 @@ async function getCurrentBlockTimestamp() {
   return (await web3.eth.getBlock('latest')).timestamp;
 }
 
+async function increaseTime(duration) {
+  await time.increase(duration);
+}
+
 module.exports = {
   toWei,
   ZERO_ADDRESS,
@@ -102,4 +107,5 @@ module.exports = {
   signERC721H,
   signERC1155H,
   getCurrentBlockTimestamp,
+  increaseTime,
 };
