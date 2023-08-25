@@ -7,35 +7,33 @@ contract ListingMock is Listing {
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    function erc721FixedSaleListingID(address nftAddress, uint256 nftID) external view returns (uint256) {
-        return _erc721FixedSaleListingID[nftAddress][nftID];
+    function erc721SaleListingID(address nftAddress, uint256 nftID) external view returns (uint256) {
+        return _erc721SaleListingID[nftAddress][nftID];
     }
 
-    function erc1155FixedSaleListingOwners(
+    function erc1155SaleListingOwners(
         address nftAddress,
         uint256 nftID
     ) external view returns (address[] memory array) {
-        uint256 length = _erc1155FixedSaleListingOwners[nftAddress][nftID].length();
+        uint256 length = _erc1155SaleListingOwners[nftAddress][nftID].length();
         array = new address[](length);
         for (uint256 i = 0; i < length; i++) {
-            array[i] = _erc1155FixedSaleListingOwners[nftAddress][nftID].at(i);
+            array[i] = _erc1155SaleListingOwners[nftAddress][nftID].at(i);
         }
         return array;
     }
 
-    function erc1155FixedSaleListingID(
+    function erc1155SaleListingID(
         address nftAddress,
         uint256 nftID,
         address owner
-    ) external view returns (uint256 totalQuantity, uint256[] memory erc1155FixedSaleListingIDs) {
-        totalQuantity = _erc1155FixedSaleListingID[nftAddress][nftID][owner].totalQuantity;
+    ) external view returns (uint256 totalQuantity, uint256[] memory erc1155SaleListingIDs) {
+        totalQuantity = _erc1155SaleListingID[nftAddress][nftID][owner].totalQuantity;
 
-        uint256 length = _erc1155FixedSaleListingID[nftAddress][nftID][owner].erc1155FixedSaleListingIDs.length();
-        erc1155FixedSaleListingIDs = new uint256[](length);
+        uint256 length = _erc1155SaleListingID[nftAddress][nftID][owner].erc1155SaleListingIDs.length();
+        erc1155SaleListingIDs = new uint256[](length);
         for (uint256 i = 0; i < length; i++) {
-            erc1155FixedSaleListingIDs[i] = _erc1155FixedSaleListingID[nftAddress][nftID][owner]
-                .erc1155FixedSaleListingIDs
-                .at(i);
+            erc1155SaleListingIDs[i] = _erc1155SaleListingID[nftAddress][nftID][owner].erc1155SaleListingIDs.at(i);
         }
     }
 }
