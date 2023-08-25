@@ -819,7 +819,7 @@ describe('Listing', async () => {
       });
     });
   });
-  describe.only('listAuctionSale', async () => {
+  describe('listAuctionSale', async () => {
     describe('ERC721', async () => {
       let index;
       let quantity;
