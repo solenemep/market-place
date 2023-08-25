@@ -22,4 +22,6 @@ contract Auction is IAuction, OwnableUpgradeable {
     }
 
     function setDependencies(address registryAddress) external onlyOwner {}
+
+    function createAuction() external override {}
 }

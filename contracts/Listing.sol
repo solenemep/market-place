@@ -43,8 +43,6 @@ contract Listing is IListing, OwnableUpgradeable {
     mapping(address => mapping(uint256 => EnumerableSet.AddressSet)) internal _erc1155SaleListingOwners; // nftAddress -> nftID -> owners
     mapping(address => mapping(uint256 => mapping(address => ERC1155SaleID))) internal _erc1155SaleListingID; // nftAddress -> nftID -> owner -> ERC1155SaleID
 
-    // AUCTION
-
     event ListedFixedSale(
         address indexed nftAddress,
         uint256 indexed nftID,
@@ -303,6 +301,39 @@ contract Listing is IListing, OwnableUpgradeable {
     // ||   AUCTION   ||
     // =================
 
+    function isAuctionSaleListed(uint256 saleListingID) external view returns (bool isListed) {
+        address nftAddress = saleListing[saleListingID].nftAddress;
+        uint256 nftID = saleListing[saleListingID].nftID;
+        address owner = saleListing[saleListingID].owner;
+
+        if (NFTIdentifier.isERC721(nftAddress)) {
+            if (
+                saleListing[saleListingID].list == List.AUCTION_SALE &&
+                nftRegistry.isWhitelisted(nftAddress, nftID) &&
+                !_isAuctionSaleListingExpired(saleListingID) &&
+                IERC721(nftAddress).isApprovedForAll(owner, address(this))
+            ) {
+                isListed = true;
+            }
+        }
+        if (NFTIdentifier.isERC1155(nftAddress)) {
+            if (
+                saleListing[saleListingID].list == List.AUCTION_SALE &&
+                nftRegistry.isWhitelisted(nftAddress, nftID) &&
+                !_isAuctionSaleListingExpired(saleListingID) &&
+                IERC1155(nftAddress).isApprovedForAll(owner, address(this))
+            ) {
+                isListed = true;
+            }
+        }
+    }
+
+    function _isAuctionSaleListingExpired(
+        uint256 saleListingID
+    ) internal view returns (bool isAuctionSaleListingExpired) {
+        isAuctionSaleListingExpired = block.timestamp >= saleListing[saleListingID].endTime;
+    }
+
     /// @notice list a NFT on english auction sale
     /// @param nftAddress contract address of NFT to list
     /// @param nftID ID of NFT to list
@@ -327,6 +358,7 @@ contract Listing is IListing, OwnableUpgradeable {
             require(_erc721SaleListingID[nftAddress][nftID] == 0, "Listing : already listed");
 
             _list(List.AUCTION_SALE, true, nftAddress, nftID, msg.sender, minPrice, startTime, endTime, 1);
+            auction.createAuction();
 
             emit ListedAuctionSale(nftAddress, nftID, msg.sender, minPrice, startTime, endTime, 1);
         } else if (NFTIdentifier.isERC1155(nftAddress)) {
@@ -339,6 +371,7 @@ contract Listing is IListing, OwnableUpgradeable {
             );
 
             _list(List.AUCTION_SALE, false, nftAddress, nftID, msg.sender, minPrice, startTime, endTime, quantity);
+            auction.createAuction();
 
             emit ListedAuctionSale(nftAddress, nftID, msg.sender, minPrice, startTime, endTime, quantity);
         }

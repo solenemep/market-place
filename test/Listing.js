@@ -169,7 +169,7 @@ describe('Listing', async () => {
       it('emit ListedFixedSale event', async () => {
         await expect(listing.connect(user1).listFixedSale(erc721HAddress, 1, price, expiration, quantity))
           .to.emit(listing, 'ListedFixedSale')
-          .withArgs(erc721HAddress, 1, user1.address, price, expiration, 1);
+          .withArgs(erc721HAddress, 1, user1.address, price, expiration, quantity);
       });
     });
     describe('ERC1155', async () => {
@@ -816,6 +816,312 @@ describe('Listing', async () => {
         )
           .to.emit(listing, 'BoughtFixedSale')
           .withArgs(erc1155HAddress, 1, user3.address, quantity);
+      });
+    });
+  });
+  describe.only('listAuctionSale', async () => {
+    describe('ERC721', async () => {
+      let index;
+      let quantity;
+      let startTime, endTime;
+
+      let saleListing;
+      let erc721SaleListingID;
+      beforeEach('setup', async () => {
+        index = 1;
+        quantity = 1;
+        startTime = await getCurrentBlockTimestamp();
+        endTime = toBN(startTime).plus(validTime).toString();
+
+        await erc721H.connect(owner).mintMock(user1.address, 1);
+        await nftRegistry.connect(whitelister).addWhitelist(erc721HAddress, 1);
+        await erc721H.connect(user1).setApprovalForAll(listingAddress, true);
+
+        expect(await listing.isAuctionSaleListed(index)).to.equal(false);
+
+        saleListing = await listing.saleListing(index);
+        expect(saleListing.list).to.equal(List.NONE);
+        expect(saleListing.nftAddress).to.equal(ZERO_ADDRESS);
+        expect(saleListing.nftID).to.equal(0);
+        expect(saleListing.owner).to.equal(ZERO_ADDRESS);
+        expect(saleListing.price).to.equal(0);
+        expect(saleListing.startTime).to.equal(0);
+        expect(saleListing.endTime).to.equal(0);
+        expect(saleListing.quantity).to.equal(0);
+
+        erc721SaleListingID = await listing.erc721SaleListingID(erc721HAddress, 1);
+        expect(erc721SaleListingID).to.equal(0);
+      });
+      it('list sucessfully', async () => {
+        await listing.connect(user1).listAuctionSale(erc721HAddress, 1, price, startTime, endTime, quantity);
+
+        expect(await listing.isAuctionSaleListed(index)).to.equal(true);
+
+        saleListing = await listing.saleListing(index);
+        expect(saleListing.list).to.equal(List.AUCTION_SALE);
+        expect(saleListing.nftAddress).to.equal(erc721HAddress);
+        expect(saleListing.nftID).to.equal(1);
+        expect(saleListing.owner).to.equal(user1.address);
+        expect(saleListing.price).to.equal(price);
+        expect(saleListing.startTime).to.equal(startTime);
+        expect(saleListing.endTime).to.equal(endTime);
+        expect(saleListing.quantity).to.equal(quantity);
+
+        erc721SaleListingID = await listing.erc721SaleListingID(erc721HAddress, 1);
+        expect(erc721SaleListingID).to.equal(1);
+      });
+      it('reverts list if price is zero', async () => {
+        const reason = 'Listing : price must higher than 0.001 ISML';
+
+        await expect(
+          listing.connect(user1).listAuctionSale(erc721HAddress, 1, 0, startTime, endTime, quantity)
+        ).to.be.revertedWith(reason);
+      });
+      it('reverts list if wrong ending time', async () => {
+        const reason = 'Listing : auction wrong endind time';
+
+        const now = await getCurrentBlockTimestamp();
+
+        await expect(
+          listing.connect(user1).listAuctionSale(erc721HAddress, 1, price, endTime, startTime, quantity)
+        ).to.be.revertedWith(reason);
+        await expect(
+          listing.connect(user1).listAuctionSale(erc721HAddress, 1, price, startTime, now, quantity)
+        ).to.be.revertedWith(reason);
+      });
+      it('reverts list if not whitelisted', async () => {
+        const reason = 'Listing : not whitelisted';
+
+        await nftRegistry.connect(whitelister).removeWhitelist(erc721HAddress, 1);
+
+        await expect(
+          listing.connect(user1).listAuctionSale(erc721HAddress, 1, price, startTime, endTime, quantity)
+        ).to.be.revertedWith(reason);
+      });
+      it('reverts list if not the owner', async () => {
+        const reason = 'Listing : not the owner';
+
+        await expect(
+          listing.connect(user2).listAuctionSale(erc721HAddress, 1, price, startTime, endTime, quantity)
+        ).to.be.revertedWith(reason);
+      });
+      it('reverts list if already listed', async () => {
+        const reason = 'Listing : already listed';
+
+        await listing.connect(user1).listAuctionSale(erc721HAddress, 1, price, startTime, endTime, quantity);
+        expect(await listing.isAuctionSaleListed(index)).to.equal(true);
+
+        await expect(
+          listing.connect(user1).listAuctionSale(erc721HAddress, 1, price, startTime, endTime, quantity)
+        ).to.be.revertedWith(reason);
+      });
+      it('emit ListedAuctionSale event', async () => {
+        await expect(listing.connect(user1).listAuctionSale(erc721HAddress, 1, price, startTime, endTime, quantity))
+          .to.emit(listing, 'ListedAuctionSale')
+          .withArgs(erc721HAddress, 1, user1.address, price, startTime, endTime, quantity);
+      });
+    });
+    describe('ERC1155', async () => {
+      let index;
+      let quantity;
+      let startTime, endTime;
+
+      let saleListing;
+      let erc1155SaleListingOwners;
+      let erc1155SaleListingID;
+      beforeEach('setup', async () => {
+        index = 1;
+        quantity = 8;
+        startTime = await getCurrentBlockTimestamp();
+        endTime = toBN(startTime).plus(validTime).toString();
+
+        await erc1155H.connect(owner).mintMock(user1.address, 1, quantity, web3.utils.asciiToHex(''));
+        await nftRegistry.connect(whitelister).addWhitelist(erc1155HAddress, 1);
+        await erc1155H.connect(user1).setApprovalForAll(listingAddress, true);
+
+        expect(await listing.isAuctionSaleListed(index)).to.equal(false);
+
+        saleListing = await listing.saleListing(index);
+        expect(saleListing.list).to.equal(List.NONE);
+        expect(saleListing.nftAddress).to.equal(ZERO_ADDRESS);
+        expect(saleListing.nftID).to.equal(0);
+        expect(saleListing.owner).to.equal(ZERO_ADDRESS);
+        expect(saleListing.price).to.equal(0);
+        expect(saleListing.startTime).to.equal(0);
+        expect(saleListing.endTime).to.equal(0);
+        expect(saleListing.quantity).to.equal(0);
+
+        erc1155SaleListingOwners = await listing.erc1155SaleListingOwners(erc1155HAddress, 1);
+        expect(erc1155SaleListingOwners.length).to.equal(0);
+
+        erc1155SaleListingID = await listing.erc1155SaleListingID(erc1155HAddress, 1, user1.address);
+        expect(erc1155SaleListingID.totalQuantity).to.equal(0);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs.length).to.equal(0);
+      });
+      it('list sucessfully', async () => {
+        await listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price, startTime, endTime, quantity);
+
+        expect(await listing.isAuctionSaleListed(index)).to.equal(true);
+
+        saleListing = await listing.saleListing(index);
+        expect(saleListing.list).to.equal(List.AUCTION_SALE);
+        expect(saleListing.nftAddress).to.equal(erc1155HAddress);
+        expect(saleListing.nftID).to.equal(1);
+        expect(saleListing.owner).to.equal(user1.address);
+        expect(saleListing.price).to.equal(price);
+        expect(saleListing.startTime).to.equal(startTime);
+        expect(saleListing.endTime).to.equal(endTime);
+        expect(saleListing.quantity).to.equal(quantity);
+
+        erc1155SaleListingOwners = await listing.erc1155SaleListingOwners(erc1155HAddress, 1);
+        expect(erc1155SaleListingOwners.length).to.equal(1);
+        expect(erc1155SaleListingOwners[0]).to.equal(user1.address);
+
+        erc1155SaleListingID = await listing.erc1155SaleListingID(erc1155HAddress, 1, user1.address);
+        expect(erc1155SaleListingID.totalQuantity).to.equal(quantity);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs.length).to.equal(index);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs[0]).to.equal(index);
+      });
+      it('list twice same user - diff price', async () => {
+        quantity = 4;
+        const index1 = 1;
+        const price1 = toWei('20');
+        const index2 = 2;
+        const price2 = toWei('10');
+
+        await listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price1, startTime, endTime, quantity);
+        expect(await listing.isAuctionSaleListed(index1)).to.equal(true);
+
+        await listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price2, startTime, endTime, quantity);
+        expect(await listing.isAuctionSaleListed(index2)).to.equal(true);
+
+        saleListing = await listing.saleListing(index1);
+        expect(saleListing.list).to.equal(List.AUCTION_SALE);
+        expect(saleListing.nftAddress).to.equal(erc1155HAddress);
+        expect(saleListing.nftID).to.equal(1);
+        expect(saleListing.owner).to.equal(user1.address);
+        expect(saleListing.price).to.equal(price1);
+        expect(saleListing.startTime).to.equal(startTime);
+        expect(saleListing.endTime).to.equal(endTime);
+        expect(saleListing.quantity).to.equal(quantity);
+
+        saleListing = await listing.saleListing(index2);
+        expect(saleListing.list).to.equal(List.AUCTION_SALE);
+        expect(saleListing.nftAddress).to.equal(erc1155HAddress);
+        expect(saleListing.nftID).to.equal(1);
+        expect(saleListing.owner).to.equal(user1.address);
+        expect(saleListing.price).to.equal(price2);
+        expect(saleListing.startTime).to.equal(startTime);
+        expect(saleListing.endTime).to.equal(endTime);
+        expect(saleListing.quantity).to.equal(quantity);
+
+        erc1155SaleListingOwners = await listing.erc1155SaleListingOwners(erc1155HAddress, 1);
+        expect(erc1155SaleListingOwners.length).to.equal(1);
+        expect(erc1155SaleListingOwners[0]).to.equal(user1.address);
+
+        erc1155SaleListingID = await listing.erc1155SaleListingID(erc1155HAddress, 1, user1.address);
+        expect(erc1155SaleListingID.totalQuantity).to.equal(quantity * 2);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs.length).to.equal(2);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs[0]).to.equal(index1);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs[1]).to.equal(index2);
+      });
+      it('list twice diff user - same price', async () => {
+        await erc1155H.connect(owner).mintMock(user2.address, 1, quantity, web3.utils.asciiToHex(''));
+        await erc1155H.connect(user2).setApprovalForAll(listingAddress, true);
+
+        const index1 = 1;
+        const index2 = 2;
+
+        await listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price, startTime, endTime, quantity);
+        expect(await listing.isAuctionSaleListed(index1)).to.equal(true);
+
+        await listing.connect(user2).listAuctionSale(erc1155HAddress, 1, price, startTime, endTime, quantity);
+        expect(await listing.isAuctionSaleListed(index2)).to.equal(true);
+
+        saleListing = await listing.saleListing(index1);
+        expect(saleListing.list).to.equal(List.AUCTION_SALE);
+        expect(saleListing.nftAddress).to.equal(erc1155HAddress);
+        expect(saleListing.nftID).to.equal(1);
+        expect(saleListing.owner).to.equal(user1.address);
+        expect(saleListing.price).to.equal(price);
+        expect(saleListing.startTime).to.equal(startTime);
+        expect(saleListing.endTime).to.equal(endTime);
+        expect(saleListing.quantity).to.equal(quantity);
+
+        saleListing = await listing.saleListing(index2);
+        expect(saleListing.list).to.equal(List.AUCTION_SALE);
+        expect(saleListing.nftAddress).to.equal(erc1155HAddress);
+        expect(saleListing.nftID).to.equal(1);
+        expect(saleListing.owner).to.equal(user2.address);
+        expect(saleListing.price).to.equal(price);
+        expect(saleListing.startTime).to.equal(startTime);
+        expect(saleListing.endTime).to.equal(endTime);
+        expect(saleListing.quantity).to.equal(quantity);
+
+        erc1155SaleListingOwners = await listing.erc1155SaleListingOwners(erc1155HAddress, 1);
+        expect(erc1155SaleListingOwners.length).to.equal(2);
+        expect(erc1155SaleListingOwners[0]).to.equal(user1.address);
+        expect(erc1155SaleListingOwners[1]).to.equal(user2.address);
+
+        erc1155SaleListingID = await listing.erc1155SaleListingID(erc1155HAddress, 1, user1.address);
+        expect(erc1155SaleListingID.totalQuantity).to.equal(quantity);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs.length).to.equal(1);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs[0]).to.equal(index1);
+
+        erc1155SaleListingID = await listing.erc1155SaleListingID(erc1155HAddress, 1, user2.address);
+        expect(erc1155SaleListingID.totalQuantity).to.equal(quantity);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs.length).to.equal(1);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs[0]).to.equal(index2);
+      });
+      it('reverts list if price is zero', async () => {
+        const reason = 'Listing : price must higher than 0.001 ISML';
+
+        await expect(
+          listing.connect(user1).listAuctionSale(erc1155HAddress, 1, 0, startTime, endTime, quantity)
+        ).to.be.revertedWith(reason);
+      });
+      it('reverts list if wrong ending time', async () => {
+        const reason = 'Listing : auction wrong endind time';
+
+        const now = await getCurrentBlockTimestamp();
+
+        await expect(
+          listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price, endTime, startTime, quantity)
+        ).to.be.revertedWith(reason);
+        await expect(
+          listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price, startTime, now, quantity)
+        ).to.be.revertedWith(reason);
+      });
+      it('reverts list if not whitelisted', async () => {
+        const reason = 'Listing : not whitelisted';
+
+        await nftRegistry.connect(whitelister).removeWhitelist(erc1155HAddress, 1);
+
+        await expect(
+          listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price, startTime, endTime, quantity)
+        ).to.be.revertedWith(reason);
+      });
+      it('reverts list if not the owner', async () => {
+        const reason = 'Listing : not the owner or quantity already listed';
+
+        await expect(
+          listing.connect(user2).listAuctionSale(erc1155HAddress, 1, price, startTime, endTime, quantity)
+        ).to.be.revertedWith(reason);
+      });
+      it('reverts list if already listed', async () => {
+        const reason = 'Listing : not the owner or quantity already listed';
+
+        await listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price, startTime, endTime, quantity);
+        expect(await listing.isAuctionSaleListed(index)).to.equal(true);
+
+        await expect(
+          listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price, startTime, endTime, quantity)
+        ).to.be.revertedWith(reason);
+      });
+      it('emit ListedAuctionSale event', async () => {
+        await expect(listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price, startTime, endTime, quantity))
+          .to.emit(listing, 'ListedAuctionSale')
+          .withArgs(erc1155HAddress, 1, user1.address, price, startTime, endTime, quantity);
       });
     });
   });
