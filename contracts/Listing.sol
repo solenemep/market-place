@@ -26,6 +26,8 @@ contract Listing is IListing, OwnableUpgradeable {
     using NFTIdentifier for address;
     using SafeMath for uint256;
 
+    uint256 public constant MIN_PRICE = 10 ** 15;
+
     INFTRegistry public nftRegistry;
     IAuction public auction;
 
@@ -124,7 +126,7 @@ contract Listing is IListing, OwnableUpgradeable {
         uint256 expiration,
         uint256 quantity
     ) external {
-        require(price > 0, "Listing : price must higher than zero");
+        require(price >= MIN_PRICE, "Listing : price must higher than 0.001 ISML");
         require(nftRegistry.isWhitelisted(nftAddress, nftID), "Listing : not whitelisted");
 
         if (NFTIdentifier.isERC721(nftAddress)) {
@@ -290,7 +292,20 @@ contract Listing is IListing, OwnableUpgradeable {
     // =================
 
     /// @notice list a NFT on english auction sale
-    function listAuctionSale() external {}
+    /// @param nftAddress contract address of NFT to list
+    /// @param nftID ID of NFT to list
+    /// @param minPrice starting bid price of NFT to list
+    /// @param startTime auction start time
+    /// @param endTime auction end time
+    /// @param quantity quantity to list in case of ERC1155
+    function listAuctionSale(
+        address nftAddress,
+        uint256 nftID,
+        uint256 minPrice,
+        uint256 startTime,
+        uint256 endTime,
+        uint256 quantity
+    ) external {}
 
     /// @notice unlist a NFT from english auction sale
     function unlistAuctionSale(address nftAddress, uint256 nftID) external {}

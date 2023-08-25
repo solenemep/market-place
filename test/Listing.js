@@ -28,11 +28,8 @@ describe('Listing', async () => {
 
   const WHITELISTER_ROLE = web3.utils.soliditySha3('WHITELISTER_ROLE');
 
-  const LIST = { NONE: 0, FIXED_SALE: 1, AUCTION_SALE: 2 };
-
-  const price = toWei('1000', 'mwei');
+  const price = toWei('1000000', 'gwei');
   const validTime = 10 * 24 * 60 * 60;
-  const quantity = 10;
 
   before('setup', async () => {
     const setups = await init();
@@ -131,7 +128,7 @@ describe('Listing', async () => {
         expect(erc721FixedSaleListingID).to.equal(1);
       });
       it('reverts list if price is zero', async () => {
-        const reason = 'Listing : price must higher than zero';
+        const reason = 'Listing : price must higher than 0.001 ISML';
 
         await expect(
           listing.connect(user1).listFixedSale(erc721HAddress, 1, 0, expiration, quantity)
@@ -179,7 +176,7 @@ describe('Listing', async () => {
       let erc1155FixedSaleListingID;
       beforeEach('setup', async () => {
         index = 1;
-        quantity = 10;
+        quantity = 8;
         expiration = toBN(await getCurrentBlockTimestamp())
           .plus(validTime)
           .toString();
@@ -228,7 +225,7 @@ describe('Listing', async () => {
         expect(erc1155FixedSaleListingID.erc1155FixedSaleListingIDs[0]).to.equal(index);
       });
       it('list twice same user - diff price', async () => {
-        quantity = 5;
+        quantity = 4;
         const index1 = 1;
         const price1 = toWei('20');
         const index2 = 2;
@@ -311,7 +308,7 @@ describe('Listing', async () => {
         expect(erc1155FixedSaleListingID.erc1155FixedSaleListingIDs[0]).to.equal(index2);
       });
       it('reverts list if price is zero', async () => {
-        const reason = 'Listing : price must higher than zero';
+        const reason = 'Listing : price must higher than 0.001 ISML';
 
         await expect(
           listing.connect(user1).listFixedSale(erc1155HAddress, 1, 0, expiration, quantity)
@@ -448,7 +445,7 @@ describe('Listing', async () => {
       let erc1155FixedSaleListingID;
       beforeEach('setup', async () => {
         index = 1;
-        quantity = 10;
+        quantity = 8;
         expiration = toBN(await getCurrentBlockTimestamp())
           .plus(validTime)
           .toString();
@@ -596,7 +593,7 @@ describe('Listing', async () => {
       });
     });
   });
-  describe('listFixedSale', async () => {
+  describe('buyFixedSale', async () => {
     describe('ERC721', async () => {
       let index;
       let quantity;
@@ -608,7 +605,7 @@ describe('Listing', async () => {
         expiration = toBN(await getCurrentBlockTimestamp())
           .plus(validTime)
           .toString();
-        value = toWei('1100', 'mwei');
+        value = toWei('1100000', 'gwei');
 
         await erc721H.connect(owner).mintMock(user1.address, 1);
         await nftRegistry.connect(whitelister).addWhitelist(erc721HAddress, 1);
@@ -624,7 +621,7 @@ describe('Listing', async () => {
 
         await expect(tx).to.changeEtherBalance(user3.address, -value);
         await expect(tx).to.changeEtherBalance(user1.address, +price);
-        await expect(tx).to.changeEtherBalance(daoAddress, toWei('100', 'mwei'));
+        await expect(tx).to.changeEtherBalance(daoAddress, toWei('100000', 'gwei'));
 
         await expect(tx).to.changeTokenBalances(erc721H, [user1, user3], [-quantity, quantity]);
         expect(await erc721H.ownerOf(1)).to.equal(user3.address);
@@ -664,11 +661,11 @@ describe('Listing', async () => {
       let value;
       beforeEach('setup', async () => {
         index = 1;
-        quantity = 10;
+        quantity = 8;
         expiration = toBN(await getCurrentBlockTimestamp())
           .plus(validTime)
           .toString();
-        value = toWei('1100', 'mwei');
+        value = toWei('1100000', 'gwei');
 
         await erc1155H.connect(owner).mintMock(user1.address, 1, quantity, web3.utils.asciiToHex(''));
         await nftRegistry.connect(whitelister).addWhitelist(erc1155HAddress, 1);
@@ -686,7 +683,7 @@ describe('Listing', async () => {
 
         await expect(tx).to.changeEtherBalance(user3.address, -toBN(value).times(quantity).toString());
         await expect(tx).to.changeEtherBalance(user1.address, +toBN(price).times(quantity).toString());
-        await expect(tx).to.changeEtherBalance(daoAddress, toBN(toWei('100', 'mwei')).times(quantity).toString());
+        await expect(tx).to.changeEtherBalance(daoAddress, toBN(toWei('100000', 'gwei')).times(quantity).toString());
 
         expect(await erc1155H.balanceOf(user1.address, 1)).to.equal(0);
         expect(await erc1155H.balanceOf(user3.address, 1)).to.equal(quantity);
@@ -712,7 +709,7 @@ describe('Listing', async () => {
         );
         await expect(tx).to.changeEtherBalance(
           daoAddress,
-          toBN(toWei('100', 'mwei'))
+          toBN(toWei('100000', 'gwei'))
             .times(quantity / 2)
             .toString()
         );
