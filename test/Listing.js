@@ -156,11 +156,23 @@ describe('Listing', async () => {
           listing.connect(user2).listFixedSale(erc721HAddress, 1, price, expiration, quantity)
         ).to.be.revertedWith(reason);
       });
-      it('reverts list if already listed', async () => {
+      it('reverts list if already listed - listed in fixed sale', async () => {
         const reason = 'Listing : already listed';
 
         await listing.connect(user1).listFixedSale(erc721HAddress, 1, price, expiration, quantity);
         expect(await listing.isFixedSaleListed(index)).to.equal(true);
+
+        await expect(
+          listing.connect(user1).listFixedSale(erc721HAddress, 1, price, expiration, quantity)
+        ).to.be.revertedWith(reason);
+      });
+      it('reverts list if already listed - listed in auction sale', async () => {
+        const reason = 'Listing : already listed';
+
+        const startTime = await getCurrentBlockTimestamp();
+        const endTime = toBN(startTime).plus(validTime).toString();
+        await listing.connect(user1).listAuctionSale(erc721HAddress, 1, price, startTime, endTime, quantity);
+        expect(await listing.isAuctionSaleListed(index)).to.equal(true);
 
         await expect(
           listing.connect(user1).listFixedSale(erc721HAddress, 1, price, expiration, quantity)
@@ -348,11 +360,23 @@ describe('Listing', async () => {
           listing.connect(user2).listFixedSale(erc1155HAddress, 1, price, expiration, quantity)
         ).to.be.revertedWith(reason);
       });
-      it('reverts list if already listed', async () => {
+      it('reverts list if already listed - listed in fixed sale', async () => {
         const reason = 'Listing : not the owner or quantity already listed';
 
         await listing.connect(user1).listFixedSale(erc1155HAddress, 1, price, expiration, quantity);
         expect(await listing.isFixedSaleListed(index)).to.equal(true);
+
+        await expect(
+          listing.connect(user1).listFixedSale(erc1155HAddress, 1, price, expiration, quantity)
+        ).to.be.revertedWith(reason);
+      });
+      it('reverts list if already listed - listed in auction sale', async () => {
+        const reason = 'Listing : not the owner or quantity already listed';
+
+        const startTime = await getCurrentBlockTimestamp();
+        const endTime = toBN(startTime).plus(validTime).toString();
+        await listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price, startTime, endTime, quantity);
+        expect(await listing.isAuctionSaleListed(index)).to.equal(true);
 
         await expect(
           listing.connect(user1).listFixedSale(erc1155HAddress, 1, price, expiration, quantity)
@@ -441,11 +465,23 @@ describe('Listing', async () => {
         erc721SaleListingID = await listing.erc721SaleListingID(erc721HAddress, 1);
         expect(erc721SaleListingID).to.equal(0);
       });
-      it('reverts list if not listed in fixed sale', async () => {
+      it('reverts list if not listed in fixed sale - not listed', async () => {
         const reason = 'Listing : not listed in fixed sale';
 
         await listing.connect(user1).unlistFixedSale(index, quantity);
 
+        await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
+      });
+      it('reverts list if not listed in fixed sale - listed in auction sale', async () => {
+        const reason = 'Listing : not listed in fixed sale';
+
+        await listing.connect(user1).unlistFixedSale(index, quantity);
+        const startTime = await getCurrentBlockTimestamp();
+        const endTime = toBN(startTime).plus(validTime).toString();
+        await listing.connect(user1).listAuctionSale(erc721HAddress, 1, price, startTime, endTime, quantity);
+
+        await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
+        index = 2;
         await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
       });
       it('reverts list if not the owner', async () => {
@@ -601,11 +637,23 @@ describe('Listing', async () => {
         expect(erc1155SaleListingID.erc1155SaleListingIDs.length).to.equal(index);
         expect(erc1155SaleListingID.erc1155SaleListingIDs[0]).to.equal(index);
       });
-      it('reverts list if not listed in fixed sale', async () => {
+      it('reverts list if not listed in fixed sale - not listed', async () => {
         const reason = 'Listing : not listed in fixed sale';
 
         await listing.connect(user1).unlistFixedSale(index, quantity);
 
+        await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
+      });
+      it('reverts list if not listed in fixed sale - listed in auction sale', async () => {
+        const reason = 'Listing : not listed in fixed sale';
+
+        await listing.connect(user1).unlistFixedSale(index, quantity);
+        const startTime = await getCurrentBlockTimestamp();
+        const endTime = toBN(startTime).plus(validTime).toString();
+        await listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price, startTime, endTime, quantity);
+
+        await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
+        index = 2;
         await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
       });
       it('reverts list if not the owner', async () => {
@@ -662,12 +710,24 @@ describe('Listing', async () => {
         expect(await erc721H.balanceOf(user1.address)).to.equal(0);
         expect(await erc721H.balanceOf(user3.address)).to.equal(quantity);
       });
-      it('reverts list if not listed in fixed sale', async () => {
+      it('reverts list if not listed in fixed sale - not listed', async () => {
         const reason = 'Listing : not listed in fixed sale';
 
         await listing.connect(user1).unlistFixedSale(index, quantity);
 
         await expect(listing.connect(user3).buyFixedSale(index, quantity, { value: value })).to.be.revertedWith(reason);
+      });
+      it('reverts list if not listed in fixed sale - listed in auction sale', async () => {
+        const reason = 'Listing : not listed in fixed sale';
+
+        await listing.connect(user1).unlistFixedSale(index, quantity);
+        const startTime = await getCurrentBlockTimestamp();
+        const endTime = toBN(startTime).plus(validTime).toString();
+        await listing.connect(user1).listAuctionSale(erc721HAddress, 1, price, startTime, endTime, quantity);
+
+        await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
+        index = 2;
+        await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
       });
       it('reverts if not whitelisted', async () => {
         const reason = 'Listing : not whitelisted';
@@ -758,12 +818,24 @@ describe('Listing', async () => {
         expect(await erc1155H.balanceOf(user1.address, 1)).to.equal(quantity / 2);
         expect(await erc1155H.balanceOf(user3.address, 1)).to.equal(quantity / 2);
       });
-      it('reverts list if not listed in fixed sale', async () => {
+      it('reverts list if not listed in fixed sale - not listed', async () => {
         const reason = 'Listing : not listed in fixed sale';
 
         await listing.connect(user1).unlistFixedSale(index, quantity);
 
         await expect(listing.connect(user3).buyFixedSale(index, quantity, { value: value })).to.be.revertedWith(reason);
+      });
+      it('reverts list if not listed in fixed sale - listed in auction sale', async () => {
+        const reason = 'Listing : not listed in fixed sale';
+
+        await listing.connect(user1).unlistFixedSale(index, quantity);
+        const startTime = await getCurrentBlockTimestamp();
+        const endTime = toBN(startTime).plus(validTime).toString();
+        await listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price, startTime, endTime, quantity);
+
+        await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
+        index = 2;
+        await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
       });
       it('reverts if not whitelisted', async () => {
         const reason = 'Listing : not whitelisted';
