@@ -382,5 +382,26 @@ contract Listing is IListing, OwnableUpgradeable {
     /// @param quantity quantity to unlist in case of ERC1155
     function unlistAuctionSale(uint256 saleListingID, uint256 quantity) external override {
         require(saleListing[saleListingID].list == List.AUCTION_SALE, "Listing : not listed in auction sale");
+        // TODO require check if there are no bids on auction contract
+        require(true, "Listing : listing has bids");
+
+        address nftAddress = saleListing[saleListingID].nftAddress;
+        uint256 nftID = saleListing[saleListingID].nftID;
+        address owner = saleListing[saleListingID].owner;
+
+        if (NFTIdentifier.isERC721(nftAddress)) {
+            require(msg.sender == owner, "Listing : not the owner");
+
+            _unlist(true, saleListingID, nftAddress, nftID, owner, 1);
+
+            emit UnlistedAuctionSale(nftAddress, nftID, owner, quantity);
+        } else if (NFTIdentifier.isERC1155(nftAddress)) {
+            require(msg.sender == owner, "Listing : not the owner");
+            require(quantity <= saleListing[saleListingID].quantity, "Listing : quantity not listed");
+
+            _unlist(false, saleListingID, nftAddress, nftID, owner, quantity);
+
+            emit UnlistedAuctionSale(nftAddress, nftID, owner, quantity);
+        }
     }
 }

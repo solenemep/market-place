@@ -465,14 +465,14 @@ describe('Listing', async () => {
         erc721SaleListingID = await listing.erc721SaleListingID(erc721HAddress, 1);
         expect(erc721SaleListingID).to.equal(0);
       });
-      it('reverts list if not listed in fixed sale - not listed', async () => {
+      it('reverts unlist if not listed in fixed sale - not listed', async () => {
         const reason = 'Listing : not listed in fixed sale';
 
         await listing.connect(user1).unlistFixedSale(index, quantity);
 
         await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
       });
-      it('reverts list if not listed in fixed sale - listed in auction sale', async () => {
+      it('reverts unlist if not listed in fixed sale - listed in auction sale', async () => {
         const reason = 'Listing : not listed in fixed sale';
 
         await listing.connect(user1).unlistFixedSale(index, quantity);
@@ -484,7 +484,7 @@ describe('Listing', async () => {
         index = 2;
         await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
       });
-      it('reverts list if not the owner', async () => {
+      it('reverts unlist if not the owner', async () => {
         const reason = 'Listing : not the owner';
 
         await expect(listing.connect(user2).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
@@ -637,14 +637,14 @@ describe('Listing', async () => {
         expect(erc1155SaleListingID.erc1155SaleListingIDs.length).to.equal(index);
         expect(erc1155SaleListingID.erc1155SaleListingIDs[0]).to.equal(index);
       });
-      it('reverts list if not listed in fixed sale - not listed', async () => {
+      it('reverts unlist if not listed in fixed sale - not listed', async () => {
         const reason = 'Listing : not listed in fixed sale';
 
         await listing.connect(user1).unlistFixedSale(index, quantity);
 
         await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
       });
-      it('reverts list if not listed in fixed sale - listed in auction sale', async () => {
+      it('reverts unlist if not listed in fixed sale - listed in auction sale', async () => {
         const reason = 'Listing : not listed in fixed sale';
 
         await listing.connect(user1).unlistFixedSale(index, quantity);
@@ -656,13 +656,13 @@ describe('Listing', async () => {
         index = 2;
         await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
       });
-      it('reverts list if not the owner', async () => {
+      it('reverts unlist if not the owner', async () => {
         const reason = 'Listing : not the owner';
 
         await expect(listing.connect(user2).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
         await expect(listing.connect(whitelister).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
       });
-      it('reverts list if not quantity not listed', async () => {
+      it('reverts unlist if not quantity not listed', async () => {
         const reason = 'Listing : quantity not listed';
 
         await expect(listing.connect(user1).unlistFixedSale(index, quantity * 2)).to.be.revertedWith(reason);
@@ -710,14 +710,14 @@ describe('Listing', async () => {
         expect(await erc721H.balanceOf(user1.address)).to.equal(0);
         expect(await erc721H.balanceOf(user3.address)).to.equal(quantity);
       });
-      it('reverts list if not listed in fixed sale - not listed', async () => {
+      it('reverts buy if not listed in fixed sale - not listed', async () => {
         const reason = 'Listing : not listed in fixed sale';
 
         await listing.connect(user1).unlistFixedSale(index, quantity);
 
         await expect(listing.connect(user3).buyFixedSale(index, quantity, { value: value })).to.be.revertedWith(reason);
       });
-      it('reverts list if not listed in fixed sale - listed in auction sale', async () => {
+      it('reverts buy if not listed in fixed sale - listed in auction sale', async () => {
         const reason = 'Listing : not listed in fixed sale';
 
         await listing.connect(user1).unlistFixedSale(index, quantity);
@@ -729,21 +729,21 @@ describe('Listing', async () => {
         index = 2;
         await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
       });
-      it('reverts if not whitelisted', async () => {
+      it('reverts buy if not whitelisted', async () => {
         const reason = 'Listing : not whitelisted';
 
         await nftRegistry.connect(whitelister).removeWhitelist(erc721HAddress, 1);
 
         await expect(listing.connect(user3).buyFixedSale(index, quantity, { value: value })).to.be.revertedWith(reason);
       });
-      it('reverts if date expired', async () => {
+      it('reverts buy if date expired', async () => {
         const reason = 'Listing : listing expired';
 
         await increaseTime(validTime);
 
         await expect(listing.connect(user3).buyFixedSale(index, quantity, { value: value })).to.be.revertedWith(reason);
       });
-      it('reverts if msg.value not enough', async () => {
+      it('reverts buy if msg.value not enough', async () => {
         const reason = 'Listing : not enought ISLM';
 
         await expect(listing.connect(user3).buyFixedSale(index, quantity, { value: 0 })).to.be.revertedWith(reason);
@@ -818,14 +818,14 @@ describe('Listing', async () => {
         expect(await erc1155H.balanceOf(user1.address, 1)).to.equal(quantity / 2);
         expect(await erc1155H.balanceOf(user3.address, 1)).to.equal(quantity / 2);
       });
-      it('reverts list if not listed in fixed sale - not listed', async () => {
+      it('reverts buy if not listed in fixed sale - not listed', async () => {
         const reason = 'Listing : not listed in fixed sale';
 
         await listing.connect(user1).unlistFixedSale(index, quantity);
 
         await expect(listing.connect(user3).buyFixedSale(index, quantity, { value: value })).to.be.revertedWith(reason);
       });
-      it('reverts list if not listed in fixed sale - listed in auction sale', async () => {
+      it('reverts buy if not listed in fixed sale - listed in auction sale', async () => {
         const reason = 'Listing : not listed in fixed sale';
 
         await listing.connect(user1).unlistFixedSale(index, quantity);
@@ -837,7 +837,7 @@ describe('Listing', async () => {
         index = 2;
         await expect(listing.connect(user1).unlistFixedSale(index, quantity)).to.be.revertedWith(reason);
       });
-      it('reverts if not whitelisted', async () => {
+      it('reverts buy if not whitelisted', async () => {
         const reason = 'Listing : not whitelisted';
 
         await nftRegistry.connect(whitelister).removeWhitelist(erc1155HAddress, 1);
@@ -846,7 +846,7 @@ describe('Listing', async () => {
           listing.connect(user3).buyFixedSale(index, quantity, { value: toBN(value).times(quantity).toString() })
         ).to.be.revertedWith(reason);
       });
-      it('reverts if date expired', async () => {
+      it('reverts buy if date expired', async () => {
         const reason = 'Listing : listing expired';
 
         await increaseTime(validTime);
@@ -855,7 +855,7 @@ describe('Listing', async () => {
           listing.connect(user3).buyFixedSale(index, quantity, { value: toBN(value).times(quantity).toString() })
         ).to.be.revertedWith(reason);
       });
-      it('reverts if quantity not listed', async () => {
+      it('reverts buy if quantity not listed', async () => {
         const reason = 'Listing : quantity not listed';
 
         await expect(
@@ -873,7 +873,7 @@ describe('Listing', async () => {
           })
         ).to.be.revertedWith(reason);
       });
-      it('reverts if msg.value not enough', async () => {
+      it('reverts buy if msg.value not enough', async () => {
         const reason = 'Listing : not enought ISLM';
 
         await expect(listing.connect(user3).buyFixedSale(index, quantity, { value: 0 })).to.be.revertedWith(reason);
@@ -1194,6 +1194,294 @@ describe('Listing', async () => {
         await expect(listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price, startTime, endTime, quantity))
           .to.emit(listing, 'ListedAuctionSale')
           .withArgs(erc1155HAddress, 1, user1.address, price, startTime, endTime, quantity);
+      });
+    });
+  });
+  describe('unlistAuctionSale', async () => {
+    describe('ERC721', async () => {
+      let index;
+      let quantity;
+      let startTime, endTime;
+
+      let saleListing;
+      let erc721SaleListingID;
+      beforeEach('setup', async () => {
+        index = 1;
+        quantity = 1;
+        startTime = await getCurrentBlockTimestamp();
+        endTime = toBN(startTime).plus(validTime).toString();
+
+        await erc721H.connect(owner).mintMock(user1.address, 1);
+        await nftRegistry.connect(whitelister).addWhitelist(erc721HAddress, 1);
+        await erc721H.connect(user1).setApprovalForAll(listingAddress, true);
+        await listing.connect(user1).listAuctionSale(erc721HAddress, 1, price, startTime, endTime, quantity);
+
+        expect(await listing.isAuctionSaleListed(index)).to.equal(true);
+
+        saleListing = await listing.saleListing(index);
+        expect(saleListing.list).to.equal(List.AUCTION_SALE);
+        expect(saleListing.nftAddress).to.equal(erc721HAddress);
+        expect(saleListing.nftID).to.equal(1);
+        expect(saleListing.owner).to.equal(user1.address);
+        expect(saleListing.price).to.equal(price);
+        expect(saleListing.startTime).to.equal(startTime);
+        expect(saleListing.endTime).to.equal(endTime);
+        expect(saleListing.quantity).to.equal(quantity);
+
+        erc721SaleListingID = await listing.erc721SaleListingID(erc721HAddress, 1);
+        expect(erc721SaleListingID).to.equal(1);
+      });
+      it('unlist sucessfully', async () => {
+        await listing.connect(user1).unlistAuctionSale(index, quantity);
+
+        expect(await listing.isAuctionSaleListed(index)).to.equal(false);
+
+        saleListing = await listing.saleListing(index);
+        expect(saleListing.list).to.equal(List.NONE);
+        expect(saleListing.nftAddress).to.equal(ZERO_ADDRESS);
+        expect(saleListing.nftID).to.equal(0);
+        expect(saleListing.owner).to.equal(ZERO_ADDRESS);
+        expect(saleListing.price).to.equal(0);
+        expect(saleListing.startTime).to.equal(0);
+        expect(saleListing.endTime).to.equal(0);
+        expect(saleListing.quantity).to.equal(0);
+
+        erc721SaleListingID = await listing.erc721SaleListingID(erc721HAddress, 1);
+        expect(erc721SaleListingID).to.equal(0);
+      });
+      it('unlist when removeWhitelist', async () => {
+        await nftRegistry.connect(whitelister).removeWhitelist(erc721HAddress, 1);
+
+        expect(await listing.isAuctionSaleListed(index)).to.equal(false);
+      });
+      it('unlist when purchased', async () => {
+        // TODO
+        // await listing.connect(user3).buyAuctionSale(index, quantity, { value: price });
+        // expect(await listing.isAuctionSaleListed(index)).to.equal(false);
+        // saleListing = await listing.saleListing(index);
+        // expect(saleListing.list).to.equal(List.NONE);
+        // expect(saleListing.nftAddress).to.equal(ZERO_ADDRESS);
+        // expect(saleListing.nftID).to.equal(0);
+        // expect(saleListing.owner).to.equal(ZERO_ADDRESS);
+        // expect(saleListing.price).to.equal(0);
+        // expect(saleListing.startTime).to.equal(0);
+        // expect(saleListing.endTime).to.equal(0);
+        // expect(saleListing.quantity).to.equal(0);
+        // erc721SaleListingID = await listing.erc721SaleListingID(erc721HAddress, 1);
+        // expect(erc721SaleListingID).to.equal(0);
+      });
+      it('reverts unlist if not listed in auction sale - not listed', async () => {
+        const reason = 'Listing : not listed in auction sale';
+
+        await listing.connect(user1).unlistAuctionSale(index, quantity);
+
+        await expect(listing.connect(user1).unlistAuctionSale(index, quantity)).to.be.revertedWith(reason);
+      });
+      it('reverts unlist if not listed in auction sale - listed in fixed sale', async () => {
+        const reason = 'Listing : not listed in auction sale';
+
+        await listing.connect(user1).unlistAuctionSale(index, quantity);
+        const expiration = toBN(await getCurrentBlockTimestamp())
+          .plus(validTime)
+          .toString();
+        await listing.connect(user1).listFixedSale(erc721HAddress, 1, price, expiration, quantity);
+
+        await expect(listing.connect(user1).unlistAuctionSale(index, quantity)).to.be.revertedWith(reason);
+        index = 2;
+        await expect(listing.connect(user1).unlistAuctionSale(index, quantity)).to.be.revertedWith(reason);
+      });
+      it('reverts unlist if has bids', async () => {
+        // TODO
+        // const reason = 'Listing : listing has bids';
+        // await expect(listing.connect(user2).unlistAuctionSale(index, quantity)).to.be.revertedWith(reason);
+      });
+      it('reverts unlist if not the owner', async () => {
+        const reason = 'Listing : not the owner';
+
+        await expect(listing.connect(user2).unlistAuctionSale(index, quantity)).to.be.revertedWith(reason);
+      });
+      it('emit UnlistedAuctionSale event', async () => {
+        await expect(listing.connect(user1).unlistAuctionSale(index, quantity))
+          .to.emit(listing, 'UnlistedAuctionSale')
+          .withArgs(erc721HAddress, 1, user1.address, quantity);
+      });
+    });
+    describe('ERC1155', async () => {
+      let index;
+      let quantity;
+      let expiration;
+
+      let saleListing;
+      let erc1155SaleListingOwners;
+      let erc1155SaleListingID;
+      beforeEach('setup', async () => {
+        index = 1;
+        quantity = 8;
+        startTime = await getCurrentBlockTimestamp();
+        endTime = toBN(startTime).plus(validTime).toString();
+
+        await erc1155H.connect(owner).mintMock(user1.address, 1, quantity, web3.utils.asciiToHex(''));
+        await nftRegistry.connect(whitelister).addWhitelist(erc1155HAddress, 1);
+        await erc1155H.connect(user1).setApprovalForAll(listingAddress, true);
+        await listing.connect(user1).listAuctionSale(erc1155HAddress, 1, price, startTime, endTime, quantity);
+
+        expect(await listing.isAuctionSaleListed(index)).to.equal(true);
+
+        saleListing = await listing.saleListing(index);
+        expect(saleListing.list).to.equal(List.AUCTION_SALE);
+        expect(saleListing.nftAddress).to.equal(erc1155HAddress);
+        expect(saleListing.nftID).to.equal(1);
+        expect(saleListing.owner).to.equal(user1.address);
+        expect(saleListing.price).to.equal(price);
+        expect(saleListing.startTime).to.equal(startTime);
+        expect(saleListing.endTime).to.equal(endTime);
+        expect(saleListing.quantity).to.equal(quantity);
+
+        erc1155SaleListingOwners = await listing.erc1155SaleListingOwners(erc1155HAddress, 1);
+        expect(erc1155SaleListingOwners.length).to.equal(1);
+        expect(erc1155SaleListingOwners[0]).to.equal(user1.address);
+
+        erc1155SaleListingID = await listing.erc1155SaleListingID(erc1155HAddress, 1, user1.address);
+        expect(erc1155SaleListingID.totalQuantity).to.equal(quantity);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs.length).to.equal(index);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs[0]).to.equal(index);
+      });
+      it('unlist sucessfully - entirelly', async () => {
+        await listing.connect(user1).unlistAuctionSale(index, quantity);
+
+        expect(await listing.isAuctionSaleListed(index)).to.equal(false);
+
+        saleListing = await listing.saleListing(index);
+        expect(saleListing.list).to.equal(List.NONE);
+        expect(saleListing.nftAddress).to.equal(ZERO_ADDRESS);
+        expect(saleListing.nftID).to.equal(0);
+        expect(saleListing.owner).to.equal(ZERO_ADDRESS);
+        expect(saleListing.price).to.equal(0);
+        expect(saleListing.startTime).to.equal(0);
+        expect(saleListing.endTime).to.equal(0);
+        expect(saleListing.quantity).to.equal(0);
+
+        erc1155SaleListingOwners = await listing.erc1155SaleListingOwners(erc1155HAddress, 1);
+        expect(erc1155SaleListingOwners.length).to.equal(0);
+
+        erc1155SaleListingID = await listing.erc1155SaleListingID(erc1155HAddress, 1, user1.address);
+        expect(erc1155SaleListingID.totalQuantity).to.equal(0);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs.length).to.equal(0);
+      });
+      it('unlist sucessfully - partially', async () => {
+        await listing.connect(user1).unlistAuctionSale(index, quantity / 2);
+
+        expect(await listing.isAuctionSaleListed(index)).to.equal(true);
+
+        saleListing = await listing.saleListing(index);
+        expect(saleListing.list).to.equal(List.AUCTION_SALE);
+        expect(saleListing.nftAddress).to.equal(erc1155HAddress);
+        expect(saleListing.nftID).to.equal(1);
+        expect(saleListing.owner).to.equal(user1.address);
+        expect(saleListing.price).to.equal(price);
+        expect(saleListing.startTime).to.equal(startTime);
+        expect(saleListing.endTime).to.equal(endTime);
+        expect(saleListing.quantity).to.equal(quantity / 2);
+
+        erc1155SaleListingOwners = await listing.erc1155SaleListingOwners(erc1155HAddress, 1);
+        expect(erc1155SaleListingOwners.length).to.equal(1);
+        expect(erc1155SaleListingOwners[0]).to.equal(user1.address);
+
+        erc1155SaleListingID = await listing.erc1155SaleListingID(erc1155HAddress, 1, user1.address);
+        expect(erc1155SaleListingID.totalQuantity).to.equal(quantity / 2);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs.length).to.equal(index);
+        expect(erc1155SaleListingID.erc1155SaleListingIDs[0]).to.equal(index);
+      });
+      it('unlist when removeWhitelist', async () => {
+        await nftRegistry.connect(whitelister).removeWhitelist(erc1155HAddress, 1);
+
+        expect(await listing.isAuctionSaleListed(index)).to.equal(false);
+      });
+      it('unlist when purchased - entirelly', async () => {
+        // TODO
+        // await listing.connect(user3).buyAuctionSale(index, quantity, { value: toBN(price).times(quantity).toString() });
+        // expect(await listing.isAuctionSaleListed(index)).to.equal(false);
+        // saleListing = await listing.saleListing(index);
+        // expect(saleListing.list).to.equal(List.NONE);
+        // expect(saleListing.nftAddress).to.equal(ZERO_ADDRESS);
+        // expect(saleListing.nftID).to.equal(0);
+        // expect(saleListing.owner).to.equal(ZERO_ADDRESS);
+        // expect(saleListing.price).to.equal(0);
+        // expect(saleListing.startTime).to.equal(0);
+        // expect(saleListing.endTime).to.equal(0);
+        // expect(saleListing.quantity).to.equal(0);
+        // erc1155SaleListingOwners = await listing.erc1155SaleListingOwners(erc1155HAddress, 1);
+        // expect(erc1155SaleListingOwners.length).to.equal(0);
+        // erc1155SaleListingID = await listing.erc1155SaleListingID(erc1155HAddress, 1, user1.address);
+        // expect(erc1155SaleListingID.totalQuantity).to.equal(0);
+        // expect(erc1155SaleListingID.erc1155SaleListingIDs.length).to.equal(0);
+      });
+      it('unlist when purchased - partially', async () => {
+        // TODO
+        // await listing.connect(user3).buyAuctionSale(index, quantity / 2, {
+        //   value: toBN(price)
+        //     .times(quantity / 2)
+        //     .toString(),
+        // });
+        // expect(await listing.isAuctionSaleListed(index)).to.equal(true);
+        // saleListing = await listing.saleListing(index);
+        // expect(saleListing.list).to.equal(List.AUCTION_SALE);
+        // expect(saleListing.nftAddress).to.equal(erc1155HAddress);
+        // expect(saleListing.nftID).to.equal(1);
+        // expect(saleListing.owner).to.equal(user1.address);
+        // expect(saleListing.price).to.equal(price);
+        // expect(saleListing.startTime).to.equal(0);
+        // expect(saleListing.endTime).to.equal(expiration);
+        // expect(saleListing.quantity).to.equal(quantity / 2);
+        // erc1155SaleListingOwners = await listing.erc1155SaleListingOwners(erc1155HAddress, 1);
+        // expect(erc1155SaleListingOwners.length).to.equal(1);
+        // expect(erc1155SaleListingOwners[0]).to.equal(user1.address);
+        // erc1155SaleListingID = await listing.erc1155SaleListingID(erc1155HAddress, 1, user1.address);
+        // expect(erc1155SaleListingID.totalQuantity).to.equal(quantity / 2);
+        // expect(erc1155SaleListingID.erc1155SaleListingIDs.length).to.equal(index);
+        // expect(erc1155SaleListingID.erc1155SaleListingIDs[0]).to.equal(index);
+      });
+      it('reverts unlist if not listed in auction sale - not listed', async () => {
+        const reason = 'Listing : not listed in auction sale';
+
+        await listing.connect(user1).unlistAuctionSale(index, quantity);
+
+        await expect(listing.connect(user1).unlistAuctionSale(index, quantity)).to.be.revertedWith(reason);
+      });
+      it('reverts unlist if not listed in auction sale - listed in fixed sale', async () => {
+        const reason = 'Listing : not listed in auction sale';
+
+        await listing.connect(user1).unlistAuctionSale(index, quantity);
+        const expiration = toBN(await getCurrentBlockTimestamp())
+          .plus(validTime)
+          .toString();
+        await listing.connect(user1).listFixedSale(erc1155HAddress, 1, price, expiration, quantity);
+
+        await expect(listing.connect(user1).unlistAuctionSale(index, quantity)).to.be.revertedWith(reason);
+        index = 2;
+        await expect(listing.connect(user1).unlistAuctionSale(index, quantity)).to.be.revertedWith(reason);
+      });
+      it('reverts unlist if has bids', async () => {
+        // TODO
+        // const reason = 'Listing : listing has bids';
+        // await expect(listing.connect(user2).unlistAuctionSale(index, quantity)).to.be.revertedWith(reason);
+      });
+      it('reverts unlist if not the owner', async () => {
+        const reason = 'Listing : not the owner';
+
+        await expect(listing.connect(user2).unlistAuctionSale(index, quantity)).to.be.revertedWith(reason);
+        await expect(listing.connect(whitelister).unlistAuctionSale(index, quantity)).to.be.revertedWith(reason);
+      });
+      it('reverts unlist if not quantity not listed', async () => {
+        const reason = 'Listing : quantity not listed';
+
+        await expect(listing.connect(user1).unlistAuctionSale(index, quantity * 2)).to.be.revertedWith(reason);
+        await expect(listing.connect(user1).unlistAuctionSale(index, quantity + 1)).to.be.revertedWith(reason);
+      });
+      it('emit UnlistedAuctionSale event', async () => {
+        await expect(listing.connect(user1).unlistAuctionSale(index, quantity))
+          .to.emit(listing, 'UnlistedAuctionSale')
+          .withArgs(erc1155HAddress, 1, user1.address, quantity);
       });
     });
   });
