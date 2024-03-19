@@ -21,22 +21,30 @@ contract ERC1155H is IERC1155H, ERC1155URIStorage, Ownable, EIP712 {
     string private constant _SIGNING_DOMAIN_VERSION = "1";
 
     bytes32 private constant _ERC1155HDATA_TYPEHASH =
-        keccak256("ERC1155HData(address to,uint256 value,string tokenURI)");
+    keccak256("ERC1155HData(address to,uint256 value,string tokenURI,uint256 royaltyPercent)");
+
+    uint256 public constant ROYALTY_LIMIT = 10;
 
     INFTRegistry public nftRegistry;
 
     Counters.Counter private _tokenIds;
 
-    struct ERC1155HData {
-        address to;
-        uint256 value;
-        string tokenURI;
-        bytes signature;
+    address public systemAddress;
+
+    mapping(uint256 => Royalties) public override royalties; // tokenId -> Royalties
+
+    mapping(uint256 => uint256) public totalSupply;
+
+    event TokenDeployed(address nftAddress);
+
+    constructor(string memory uri, address _systemAddress) ERC1155(uri) EIP712(_SIGNING_DOMAIN_NAME, _SIGNING_DOMAIN_VERSION) {
+        systemAddress = _systemAddress;
+
+        emit TokenDeployed(address(this));
     }
 
-    constructor(string memory uri) ERC1155(uri) EIP712(_SIGNING_DOMAIN_NAME, _SIGNING_DOMAIN_VERSION) {}
-
-    function setDependencies(address registryAddress) external onlyOwner {
+    function setDependencies(address registryAddress) external {
+        require(msg.sender == owner() || msg.sender == systemAddress, 'ERC1155H: wrong caller');
         nftRegistry = INFTRegistry(Registry(registryAddress).getContract("NFT_REGISTRY"));
     }
 
@@ -47,7 +55,8 @@ contract ERC1155H is IERC1155H, ERC1155URIStorage, Ownable, EIP712 {
                     _ERC1155HDATA_TYPEHASH,
                     erc1155HData.to,
                     erc1155HData.value,
-                    keccak256(bytes(erc1155HData.tokenURI))
+                    keccak256(bytes(erc1155HData.tokenURI)),
+                    erc1155HData.royaltyPercent
                 )
             )
         );
@@ -55,23 +64,39 @@ contract ERC1155H is IERC1155H, ERC1155URIStorage, Ownable, EIP712 {
         return signer;
     }
 
-    function mint(ERC1155HData calldata erc1155HData) external onlyOwner returns (uint256 tokenId) {
+    function mint(ERC1155HData calldata erc1155HData) external returns (uint256 tokenId) {
         address signer = recover(erc1155HData);
-        require(signer == erc1155HData.to, "ERC1155H : wrong signature");
+        require(msg.sender == systemAddress, "ERC1155H: wrong caller");
+        require(signer == erc1155HData.to, "ERC1155H: wrong signature");
+        require(
+            0 <= erc1155HData.royaltyPercent && erc1155HData.royaltyPercent <= ROYALTY_LIMIT,
+            "ERC1155H: Wrong royalty"
+        );
 
         tokenId = _tokenIds.current();
-        _mint(signer, tokenId, erc1155HData.value, "");
+        _mint(erc1155HData.to, tokenId, erc1155HData.value, "");
         _setURI(tokenId, erc1155HData.tokenURI);
+        _setRoyalties(tokenId, signer, erc1155HData.royaltyPercent);
+        totalSupply[tokenId] = erc1155HData.value;
 
         _tokenIds.increment();
     }
 
+    function setSystemAddress(address target) external {
+        require(msg.sender == systemAddress, "ERC1155H: wrong caller");
+        systemAddress = target;
+    }
+
+    function _setRoyalties(uint256 tokenId, address signer, uint256 royaltyPercent) internal {
+        royalties[tokenId] = Royalties({nftCreator: signer, royaltyPercent: royaltyPercent});
+    }
+
     /**
      * @dev Indicates a failure with the `operator`’s approval. Used in transfers.
-     * @param operator Address that may be allowed to operate on tokens without being their owner.
-     * @param owner Address of the current owner of a token.
+     * @param operator Address that may be allowed to operate on tokens without being their nftOwner.
+     * @param nftOwner Address of the current nftOwner of a token.
      */
-    error ERC1155MissingApprovalForAll(address operator, address owner);
+    error ERC1155MissingApprovalForAll(address operator, address nftOwner);
 
     function burn(address account, uint256 tokenId, uint256 value) public {
         if (account != _msgSender() && !isApprovedForAll(account, _msgSender())) {
@@ -79,7 +104,11 @@ contract ERC1155H is IERC1155H, ERC1155URIStorage, Ownable, EIP712 {
         }
         _burn(account, tokenId, value);
 
-        nftRegistry.removeWhitelist(address(this), tokenId);
+        totalSupply[tokenId] -= value;
+
+        if (totalSupply[tokenId] == 0) {
+            nftRegistry.removeWhitelist(address(this), tokenId);
+        }
     }
 
     function burnBatch(address account, uint256[] memory tokenIds, uint256[] memory values) public {

@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
-import "./libraries/SafeMath.sol";
+import "./libraries/UncheckedMath.sol";
 
 import "./helpers/Registry.sol";
 import "./interfaces/INFTRegistry.sol";
@@ -22,7 +22,7 @@ import "./interfaces/IWallet.sol";
 contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
-    using SafeMath for uint256;
+    using UncheckedMath for uint256;
     using Math for uint256;
 
     bytes32 public constant WHITELISTER_ROLE = keccak256("WHITELISTER_ROLE");
@@ -36,10 +36,19 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     EnumerableSet.AddressSet internal _nftAddresses; // smart contracts that carry whitelisted NFT
     mapping(address => EnumerableSet.UintSet) internal _nftIDs; // smart contract -> whitelisted NFT ID
 
+    mapping(address => mapping(uint256 => bytes32)) public nftHash; // nftAddress => nftID => hash
+
+    event AddedWhitelist(address indexed nftAddress, uint256 indexed nftID);
+    event RemovedWhitelist(address indexed nftAddress, uint256 indexed nftID);
+
+    event RequestApproved(address indexed nftAddress, uint256 indexed nftID, uint256 indexed mintingID);
+    event RequestDeclined(uint256 indexed mintingID);
+    event RequestRevoked(address indexed nftAddress, uint256 indexed nftID);
+
     modifier onlyAutorized() {
         require(
             msg.sender == address(erc721H) || msg.sender == address(erc1155H) || hasRole(WHITELISTER_ROLE, msg.sender),
-            "NFTRegistry : wrong caller"
+            "NFTR: wrong caller"
         );
         _;
     }
@@ -83,7 +92,7 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     /// @notice use with limit = countNFTAddresses()
     function getNFTAddresses(uint256 offset, uint256 limit) external view returns (address[] memory nftAddresses) {
         uint256 count = _nftAddresses.length();
-        uint256 to = (offset.tryAdd(limit)).min(count).max(offset);
+        uint256 to = (offset + limit).min(count).max(offset);
 
         nftAddresses = new address[](to.uncheckedSub(offset));
 
@@ -100,7 +109,7 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
         uint256 limit
     ) external view returns (uint256[] memory nftIDs) {
         uint256 count = _nftIDs[nftAddress].length();
-        uint256 to = (offset.tryAdd(limit)).min(count).max(offset);
+        uint256 to = (offset + limit).min(count).max(offset);
 
         nftIDs = new uint256[](to.uncheckedSub(offset));
 
@@ -113,25 +122,32 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     /// @notice whitelist a NFT
     /// @param nftAddress contract address of NFT to whitelist
     /// @param nftID ID of NFT to whitelist
-    function addWhitelist(address nftAddress, uint256 nftID) external onlyAutorized {
-        _addWhitelist(nftAddress, nftID);
+    function addWhitelist(address nftAddress, uint256 nftID, bytes32 _nftHash) external onlyAutorized {
+        _addWhitelist(nftAddress, nftID, _nftHash);
     }
 
     /// @notice whitelist a batch of NFT
     /// @param nftAddresses contract address array of NFT to whitelist
     /// @param nftIDs ID array of NFT to whitelist
-    function addWhitelistBatch(address[] memory nftAddresses, uint256[] memory nftIDs) external onlyAutorized {
-        require(nftAddresses.length == nftIDs.length, "NFTRegistry : length mismatch");
-        require(nftAddresses.length < MAX_WHITELIST, "NFTRegistry : too many NFTs");
-
+    function addWhitelistBatch(
+        address[] memory nftAddresses,
+        uint256[] memory nftIDs,
+        bytes32[] memory nftHashes
+    ) external onlyAutorized {
+        require(nftAddresses.length == nftIDs.length, "NFTR: length mismatch");
+        require(nftAddresses.length == nftHashes.length, "NFTR: length mismatch");
+        require(nftAddresses.length < MAX_WHITELIST, "NFTR: too many NFTs");
         for (uint256 i = 0; i < nftAddresses.length; i++) {
-            _addWhitelist(nftAddresses[i], nftIDs[i]);
+            _addWhitelist(nftAddresses[i], nftIDs[i], nftHashes[i]);
         }
     }
 
-    function _addWhitelist(address nftAddress, uint256 nftID) internal {
+    function _addWhitelist(address nftAddress, uint256 nftID, bytes32 _nftHash) internal {
         _nftAddresses.add(nftAddress);
         _nftIDs[nftAddress].add(nftID);
+        nftHash[nftAddress][nftID] = _nftHash;
+
+        emit AddedWhitelist(nftAddress, nftID);
     }
 
     /// @notice unwhitelist a NFT
@@ -148,17 +164,20 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
         address[] memory nftAddresses,
         uint256[] memory nftIDs
     ) external override onlyAutorized {
-        require(nftAddresses.length == nftIDs.length, "NFTRegistry : length mismatch");
-        require(nftAddresses.length < MAX_WHITELIST, "NFTRegistry : too many NFTs");
-
+        require(nftAddresses.length == nftIDs.length, "NFTR: length mismatch");
+        require(nftAddresses.length < MAX_WHITELIST, "NFTR: too many NFTs");
         for (uint256 i = 0; i < nftAddresses.length; i++) {
             _removeWhitelist(nftAddresses[i], nftIDs[i]);
         }
     }
 
     function _removeWhitelist(address nftAddress, uint256 nftID) internal {
-        _nftAddresses.remove(nftAddress);
         _nftIDs[nftAddress].remove(nftID);
+        if (_nftIDs[nftAddress].length() == 0) {
+            _nftAddresses.remove(nftAddress);
+        }
+
+        emit RemovedWhitelist(nftAddress, nftID);
     }
 
     // ====================
@@ -169,17 +188,28 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     /// @dev token has been minted and gas fee calculated
     /// @param nftAddress contract address of NFT to whitelist
     /// @param nftID ID NFT to whitelist
+    /// @param _nftHash hash NFT to whitelist
     /// @param mintingID ID of minting request
     /// @param gasFee cost of minting transaction
-    function approveRequest(address nftAddress, uint256 nftID, uint256 mintingID, uint256 gasFee) external onlyOwner {
-        _addWhitelist(nftAddress, nftID);
+    function approveRequest(
+        address nftAddress,
+        uint256 nftID,
+        bytes32 _nftHash,
+        uint256 mintingID,
+        uint256 gasFee
+    ) external onlyOwner {
+        _addWhitelist(nftAddress, nftID, _nftHash);
         wallet.updateBalance(mintingID, gasFee, true);
+
+        emit RequestApproved(nftAddress, nftID, mintingID);
     }
 
     /// @notice hard decline a minting request
     /// @param mintingID ID of minting request
     function declineRequest(uint256 mintingID) external onlyOwner {
         wallet.updateBalance(mintingID, 0, false);
+
+        emit RequestDeclined(mintingID);
     }
 
     /// @notice revoke a minting request
@@ -187,5 +217,7 @@ contract NFTRegistry is INFTRegistry, OwnableUpgradeable, AccessControlUpgradeab
     /// @param nftID ID NFT to unwhitelist
     function revokeRequest(address nftAddress, uint256 nftID) external onlyOwner {
         _removeWhitelist(nftAddress, nftID);
+
+        emit RequestRevoked(nftAddress, nftID);
     }
 }

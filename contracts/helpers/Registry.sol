@@ -13,29 +13,42 @@ contract Registry is Ownable {
     mapping(string => address) private _contracts;
     mapping(address => bool) private _isProxy;
 
+    event ContractAdded(string indexed name, address indexed contractAddress);
+    event ProxyAdded(string indexed name, address indexed contractAddress);
+    event ContractDeleted(string indexed name);
+    event ContractUpgraded(string indexed name, address indexed newImplementation);
+
     constructor() {
         _upgrader = new Upgrader();
     }
 
     function addContract(string memory name, address contractAddress) external onlyOwner {
         require(contractAddress != address(0), "Wrong address");
+        require(bytes(name).length != 0, "Wrong name");
 
         _contracts[name] = contractAddress;
+
+        emit ContractAdded(name, contractAddress);
     }
 
     function addProxyContract(string memory name, address contractAddress) external onlyOwner {
         require(contractAddress != address(0), "Wrong address");
+        require(bytes(name).length != 0, "Wrong name");
 
         TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(contractAddress, address(_upgrader), "");
 
         _contracts[name] = address(proxy);
         _isProxy[address(proxy)] = true;
+
+        emit ProxyAdded(name, contractAddress);
     }
 
     function deleteContract(string memory name) external onlyOwner {
         require(_contracts[name] != address(0), "No mapping");
 
         delete _contracts[name];
+
+        emit ContractDeleted(name);
     }
 
     function upgradeContract(string memory name, address newImplementation) external onlyOwner {
@@ -62,6 +75,8 @@ contract Registry is Ownable {
         } else {
             _upgrader.upgrade(contractToUpgrade, newImplementation);
         }
+
+        emit ContractUpgraded(name, newImplementation);
     }
 
     function getContract(string memory name) public view returns (address) {

@@ -4,6 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "compile": "npx hardhat clean && npx hardhat compile",
+    "test": "npx hardhat clean && npx hardhat test",
+    "test:coverage": "npx hardhat clean && npx hardhat coverage",
+    "deploy:testnet": "npx hardhat clean && npx hardhat run --network haqqTestnet scripts/deploy.ts  --show-stack-traces",
+    "deploy-nfts:testnet": "npx hardhat clean && npx hardhat run --network haqqTestnet scripts/deployNFTs.ts  --show-stack-traces",
     "solhint": "./node_modules/.bin/solhint -f table contracts/**/*.sol"
   },
   "author": "",
@@ -22,6 +27,7 @@
     "@types/mocha": "^10.0.1",
     "ethers": "^6.7.0",
     "hardhat": "^2.17.0",
+    "hardhat-contract-sizer": "^2.10.0",
     "hardhat-gas-reporter": "^1.0.9",
     "solhint": "^3.4.1",
     "solidity-coverage": "^0.8.4",

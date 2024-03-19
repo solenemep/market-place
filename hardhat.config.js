@@ -3,6 +3,7 @@ require('@nomicfoundation/hardhat-toolbox');
 require('@nomicfoundation/hardhat-verify');
 require('@nomiclabs/hardhat-web3');
 require('web3-eth');
+require('hardhat-contract-sizer');
 
 const args = process.env;
 
@@ -10,6 +11,9 @@ const args = process.env;
 module.exports = {
   solidity: '0.8.19',
   networks: {
+    hardhat: {
+      allowUnlimitedContractSize: true,
+    },
     haqqTestnet: {
       url: `https://rpc.eth.testedge2.haqq.network/`,
       chainId: 54211,
@@ -30,5 +34,11 @@ module.exports = {
         },
       },
     ],
+  },
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 1000,
+    },
   },
 };

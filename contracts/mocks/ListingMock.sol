@@ -26,14 +26,14 @@ contract ListingMock is Listing {
     function erc1155SaleListingID(
         address nftAddress,
         uint256 nftID,
-        address owner
+        address nftOwner
     ) external view returns (uint256 totalQuantity, uint256[] memory erc1155SaleListingIDs) {
-        totalQuantity = _erc1155SaleListingID[nftAddress][nftID][owner].totalQuantity;
+        totalQuantity = _erc1155SaleListingID[nftAddress][nftID][nftOwner].totalQuantity;
 
-        uint256 length = _erc1155SaleListingID[nftAddress][nftID][owner].erc1155SaleListingIDs.length();
+        uint256 length = _erc1155SaleListingID[nftAddress][nftID][nftOwner].erc1155SaleListingIDs.length();
         erc1155SaleListingIDs = new uint256[](length);
         for (uint256 i = 0; i < length; i++) {
-            erc1155SaleListingIDs[i] = _erc1155SaleListingID[nftAddress][nftID][owner].erc1155SaleListingIDs.at(i);
+            erc1155SaleListingIDs[i] = _erc1155SaleListingID[nftAddress][nftID][nftOwner].erc1155SaleListingIDs.at(i);
         }
     }
 }

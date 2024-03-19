@@ -5,16 +5,14 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 interface IListing {
     enum List {
-        NONE,
         FIXED_SALE,
         AUCTION_SALE
     }
 
     struct SaleListing {
-        List list;
         address nftAddress;
         uint256 nftID;
-        address owner;
+        address nftOwner;
         uint256 price;
         uint256 startTime;
         uint256 endTime;
@@ -26,5 +24,22 @@ interface IListing {
         EnumerableSet.UintSet erc1155SaleListingIDs;
     }
 
-    function unlistAuctionSale(uint256 saleListingID, uint256 quantity) external;
+    function saleListing(
+        uint256 saleListingID
+    )
+        external
+        view
+        returns (
+            address nftAddress,
+            uint256 nftID,
+            address nftOwner,
+            uint256 price,
+            uint256 startTime,
+            uint256 endTime,
+            uint256 quantity
+        );
+
+    function unlist(bool isERC721, uint256 saleListingID, address nftAddress, uint256 nftID, address nftOwner) external;
+
+    function isOnAuctionSale(uint256 saleListingID) external view returns (bool);
 }
