@@ -14,6 +14,7 @@ let listing;
 let auction;
 
 let daoAddress;
+let commissionAddress;
 
 const init = async () => {
   const users = await ethers.getSigners();
@@ -42,18 +43,21 @@ const init = async () => {
     listing,
     auction,
     daoAddress,
+    commissionAddress,
   };
 };
 
 async function deployContracts() {
+  const users = await ethers.getSigners();
+
   // Registry
   registry = await ethers.deployContract('Registry');
   await registry.waitForDeployment();
   // ERC721H
-  erc721H = await ethers.deployContract('ERC721HMock', [args.ERC721H_NAME, args.ERC721H_SYMBOL]);
+  erc721H = await ethers.deployContract('ERC721HMock', [args.ERC721H_NAME, args.ERC721H_SYMBOL, users[0].address]);
   await erc721H.waitForDeployment();
   // ERC1155H
-  erc1155H = await ethers.deployContract('ERC1155HMock', [args.ERC1155H_BASE_TOKEN_URI]);
+  erc1155H = await ethers.deployContract('ERC1155HMock', [args.ERC1155H_BASE_TOKEN_URI, users[0].address]);
   await erc1155H.waitForDeployment();
   // NFTIdentifier
   nftIdentifier = await ethers.deployContract('NFTIdentifierMock');
@@ -82,6 +86,8 @@ async function addContracts() {
   await registry.addContract(args.ERC1155H_ID, await erc1155H.getAddress());
   // DAO
   await registry.addContract(args.DAO_ID, args.DAO_ADDRESS);
+  // COMMISSION
+  await registry.addContract(args.COMMISSION_ID, args.COMMISSION_ADDRESS);
 }
 
 async function addProxies() {
@@ -138,6 +144,7 @@ async function setDependencies() {
 
 async function setUps() {
   daoAddress = await registry.getContract(args.DAO_ID);
+  commissionAddress = await registry.getContract(args.COMMISSION_ID);
 }
 
 module.exports.init = init;

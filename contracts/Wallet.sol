@@ -26,7 +26,7 @@ contract Wallet is IWallet, OwnableUpgradeable {
     event Withdrawn(uint256 mintingID, address indexed recipient, uint256 amount);
 
     modifier onlyAutorized() {
-        require(msg.sender == address(nftRegistry), "Wallet : wrong caller");
+        require(msg.sender == address(nftRegistry), "W: wrong caller");
         _;
     }
 
@@ -50,7 +50,7 @@ contract Wallet is IWallet, OwnableUpgradeable {
     function deposit(uint256 mintingID) external payable {
         require(
             balances[mintingID].wallet == address(0) || balances[mintingID].wallet == msg.sender,
-            "Wallet : not autorised"
+            "W: not autorised"
         );
 
         _deposit(mintingID, msg.sender, msg.value);
@@ -66,8 +66,8 @@ contract Wallet is IWallet, OwnableUpgradeable {
     /// @notice withdraw funds for particular minting request
     /// @param mintingID ID of minting request
     function withdraw(uint256 mintingID) external {
-        require(balances[mintingID].wallet == msg.sender, "Wallet : not autorised");
-        require(balances[mintingID].available > 0, "Wallet : nothing to withdraw");
+        require(balances[mintingID].wallet == msg.sender, "W: not autorised");
+        require(balances[mintingID].available > 0, "W: nothing to withdraw");
 
         _withdraw(mintingID, msg.sender);
     }
@@ -75,7 +75,8 @@ contract Wallet is IWallet, OwnableUpgradeable {
     function _withdraw(uint256 mintingID, address receiver) internal {
         uint256 amount = balances[mintingID].available;
         balances[mintingID].available = 0;
-        payable(receiver).sendValue(amount);
+        (bool successReceiver, ) = payable(receiver).call{value: amount}("");
+        require(successReceiver, "Failed to pay receiver");
 
         emit Withdrawn(mintingID, msg.sender, amount);
     }
@@ -88,11 +89,12 @@ contract Wallet is IWallet, OwnableUpgradeable {
         uint256 amount = balances[mintingID].locked;
         balances[mintingID].locked = 0;
         if (amount > 0) {
-            if (unlock) {
+            if (!unlock) {
+                (bool successDAO, ) = payable(daoAddress).call{value: amount}("");
+                require(successDAO, "Failed to pay daoAddress");
+            } else if (gasFee > 0) {
                 balances[mintingID].available = amount - gasFee;
                 plateformBalance += gasFee;
-            } else {
-                payable(daoAddress).sendValue(amount);
             }
         }
     }
@@ -101,6 +103,7 @@ contract Wallet is IWallet, OwnableUpgradeable {
     function withdrawPlateformBalance() external onlyOwner {
         uint256 amount = plateformBalance;
         plateformBalance = 0;
-        payable(msg.sender).sendValue(amount);
+        (bool successPlateform, ) = payable(msg.sender).call{value: amount}("");
+        require(successPlateform, "Failed to pay plateform");
     }
 }
